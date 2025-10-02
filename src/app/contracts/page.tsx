@@ -54,7 +54,7 @@ export default function ContractsPage() {
         <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-4">
           <h2 className="text-lg font-semibold mb-2">Select Contract</h2>
           <div className="text-sm space-y-2">
-            <select className="border rounded px-2 py-1 w-full" value={`${principal}.${name}`} onChange={e => onSelect(e.target.value)}>
+            <select aria-label="Select contract" className="border rounded px-2 py-1 w-full" value={`${principal}.${name}`} onChange={e => onSelect(e.target.value)}>
               {all.map(c => (
                 <option key={c.id} value={c.id}>{c.label} — {c.id}</option>
               ))}
