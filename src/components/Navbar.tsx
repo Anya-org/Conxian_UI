@@ -5,7 +5,10 @@ export default function Navbar() {
     { href: "/", label: "Dashboard" },
     { href: "/network", label: "Network" },
     { href: "/tokens", label: "Tokens" },
+    { href: "/pools", label: "Pools" },
     { href: "/contracts", label: "Contracts" },
+    { href: "/router", label: "Router" },
+    { href: "/tx", label: "Transactions" },
   ];
   return (
     <nav className="w-full border-b border-gray-200 dark:border-gray-800">

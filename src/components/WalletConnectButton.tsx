@@ -33,7 +33,7 @@ export default function WalletConnectButton() {
     <button
       onClick={onClick}
       className="text-sm px-3 py-1.5 rounded-md border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800"
-      aria-pressed={connected}
+      aria-pressed={connected ? 'true' : 'false'}
     >
       {connected ? (address ? `Connected: ${address.slice(0,6)}...${address.slice(-4)}` : "Wallet Connected") : "Connect Wallet"}
     </button>

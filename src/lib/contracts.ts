@@ -14,8 +14,10 @@ export const Tokens: ContractRef[] = [
 ];
 
 export const CoreContracts: ContractRef[] = [
+  { id: `${BASE}.dex-dex-pool`, label: 'DEX Pool', kind: 'dex' },
   { id: `${BASE}.dex-factory`, label: 'DEX Factory', kind: 'dex' },
   { id: `${BASE}.dex-router`, label: 'DEX Router', kind: 'dex' },
+  { id: `${BASE}.multi-hop-router-v3`, label: 'Router V3', kind: 'dex' },
   { id: `${BASE}.concentrated-liquidity-pool-v2`, label: 'Concentrated Pool V2', kind: 'dex' },
   { id: `${BASE}.position-nft`, label: 'Position NFT', kind: 'dex' },
   { id: `${BASE}.oracle-aggregator-v2`, label: 'Oracle Aggregator V2', kind: 'oracle' },
