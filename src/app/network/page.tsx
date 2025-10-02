@@ -2,12 +2,12 @@
 
 import React from "react";
 import { AppConfig } from "@/lib/config";
-import { getStatus, getNetworkBlockTimes, getMempool } from "@/lib/coreApi";
+import { getStatus, getNetworkBlockTimes, getMempool, CoreStatus, MempoolTx } from "@/lib/coreApi";
 
 export default function NetworkPage() {
-  const [status, setStatus] = React.useState<any>(null);
-  const [blocks, setBlocks] = React.useState<any>(null);
-  const [mempool, setMempool] = React.useState<any[]>([]);
+  const [status, setStatus] = React.useState<CoreStatus | null>(null);
+  const [blocks, setBlocks] = React.useState<unknown | null>(null);
+  const [mempool, setMempool] = React.useState<MempoolTx[]>([]);
   const [loading, setLoading] = React.useState(false);
 
   const refresh = React.useCallback(async () => {
@@ -64,7 +64,7 @@ export default function NetworkPage() {
               </tr>
             </thead>
             <tbody>
-              {mempool.map((tx: any) => (
+              {mempool.map((tx: MempoolTx) => (
                 <tr key={tx.tx_id} className="border-b border-gray-100 dark:border-gray-800">
                   <td className="py-2 pr-4 break-all">{tx.tx_id}</td>
                   <td className="py-2 pr-4">{tx.tx_type}</td>

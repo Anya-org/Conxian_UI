@@ -3,13 +3,13 @@
 import React from "react";
 import WalletConnectButton from "@/components/WalletConnectButton";
 import { userSession } from "@/lib/wallet";
-import { getAddressBalances, getFungibleTokenBalances } from "@/lib/coreApi";
+import { getAddressBalances, getFungibleTokenBalances, AddressBalances, FungibleTokenBalance } from "@/lib/coreApi";
 
 export default function TokensPage() {
   const [address, setAddress] = React.useState<string>("");
   const [loading, setLoading] = React.useState(false);
-  const [stx, setStx] = React.useState<{ balance?: string } | null>(null);
-  const [fts, setFts] = React.useState<any[]>([]);
+  const [stx, setStx] = React.useState<AddressBalances["stx"] | null>(null);
+  const [fts, setFts] = React.useState<FungibleTokenBalance[]>([]);
 
   const refresh = React.useCallback(async () => {
     if (!address) return;
@@ -72,7 +72,7 @@ export default function TokensPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {fts.map((t: any) => (
+                  {fts.map((t: FungibleTokenBalance) => (
                     <tr key={t.asset_identifier} className="border-b border-gray-100 dark:border-gray-800">
                       <td className="py-2 pr-4 break-all">{t.asset_identifier}</td>
                       <td className="py-2 pr-4">{t.balance}</td>

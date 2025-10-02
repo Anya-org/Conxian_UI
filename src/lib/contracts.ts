@@ -24,6 +24,8 @@ export const CoreContracts: ContractRef[] = [
   { id: `${BASE}.yield-optimizer`, label: 'Yield Optimizer', kind: 'rewards' },
 ];
 
-export function explorerContractUrl(contractId: string, network: 'testnet' | 'mainnet' = 'testnet') {
-  return `https://explorer.hiro.so/contract/${contractId}?chain=${network}`;
+export function explorerContractUrl(contractId: string, network: 'devnet' | 'testnet' | 'mainnet' = 'testnet') {
+  // Map devnet to 'devnet' param (Explorer may show local-only if configured). Fallback to testnet visually if needed.
+  const chain = network;
+  return `https://explorer.hiro.so/contract/${contractId}?chain=${chain}`;
 }

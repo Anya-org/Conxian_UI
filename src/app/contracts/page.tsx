@@ -3,18 +3,18 @@
 import React from "react";
 import { AppConfig } from "@/lib/config";
 import { CoreContracts, Tokens, explorerContractUrl } from "@/lib/contracts";
-import { getContractInterface, callReadOnly } from "@/lib/coreApi";
+import { getContractInterface, callReadOnly, ReadOnlyResponse } from "@/lib/coreApi";
 
 export default function ContractsPage() {
   const [principal, setPrincipal] = React.useState<string>("ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6");
   const [name, setName] = React.useState<string>("dex-factory");
-  const [iface, setIface] = React.useState<any | null>(null);
+  const [iface, setIface] = React.useState<unknown | null>(null);
   const [loading, setLoading] = React.useState(false);
 
   const [fnName, setFnName] = React.useState<string>("");
   const [args, setArgs] = React.useState<string>("");
   const [sender, setSender] = React.useState<string>("ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5");
-  const [callRes, setCallRes] = React.useState<any | null>(null);
+  const [callRes, setCallRes] = React.useState<ReadOnlyResponse | null>(null);
 
   const loadInterface = React.useCallback(async () => {
     if (!principal || !name) return;
@@ -61,7 +61,7 @@ export default function ContractsPage() {
             </select>
             <div>
               <span className="font-medium">Explorer:</span>{' '}
-              <a className="text-blue-600 hover:underline" href={explorerContractUrl(`${principal}.${name}`, AppConfig.network as any)} target="_blank" rel="noreferrer">Open</a>
+              <a className="text-blue-600 hover:underline" href={explorerContractUrl(`${principal}.${name}`, AppConfig.network as 'devnet' | 'testnet' | 'mainnet')} target="_blank" rel="noreferrer">Open</a>
             </div>
             <button onClick={loadInterface} disabled={loading} className="text-sm px-3 py-1.5 rounded-md border border-gray-300 dark:border-gray-600">
               {loading ? 'Loading...' : 'Fetch Interface'}
