@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Allow Edge DevTools or other local proxies to request dev assets
+  allowedDevOrigins: ['127.0.0.1', 'localhost'],
   env: {
     NEXT_PUBLIC_CORE_API_URL: process.env.NEXT_PUBLIC_CORE_API_URL || process.env.CORE_API_URL || "https://api.testnet.hiro.so",
   },

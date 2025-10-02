@@ -13,7 +13,7 @@
     "@stacks/connect": "^8.1.9",
     "@stacks/network": "^7.2.0",
     "@stacks/transactions": "^7.2.0",
-    "next": "15.5.2",
+    "next": "^15.6.0-canary.39",
     "react": "19.1.0",
     "react-dom": "19.1.0"
   },
