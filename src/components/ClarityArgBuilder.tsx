@@ -60,9 +60,20 @@ export default function ClarityArgBuilder({ onChange, preset, paramMeta }: { onC
   // Apply preset rows when provided
   React.useEffect(() => {
     if (preset) {
-      setRows(preset.map(p => ({ id: crypto.randomUUID(), type: p.type, value: p.value ?? "", opt: inferOptionalMode(p.type) })));
+      const built = preset.map(p => {
+        const opt: Row['opt'] = isOptionalType(p.type)
+          ? (p.type === 'optional-none' ? 'none' : 'some')
+          : null;
+        return {
+          id: crypto.randomUUID(),
+          type: p.type,
+          value: p.value ?? "",
+          opt,
+        };
+      });
+      setRows(built);
     }
-  }, [preset, inferOptionalMode]);
+  }, [preset, isOptionalType]);
 
   const addRow = () => {
     setRows((r) => [...r, { id: crypto.randomUUID(), type: "uint", value: "", opt: null }]);
