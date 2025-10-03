@@ -39,6 +39,24 @@ export default function ClarityArgBuilder({ onChange, preset, paramMeta }: { onC
   type Row = { id: string; type: ArgType; value: string; opt?: 'none' | 'some' | null };
   const [rows, setRows] = React.useState<Row[]>([]);
 
+  // Helpers (defined before useEffect usage to satisfy TS)
+  const isOptionalType = React.useCallback((t: ArgType): boolean => t.startsWith('optional-'), []);
+  const inferOptionalMode = React.useCallback((t: ArgType): Row['opt'] => {
+    if (!isOptionalType(t)) return null;
+    return t === 'optional-none' ? 'none' : 'some';
+  }, [isOptionalType]);
+  const baseFromOptional = React.useCallback((t: ArgType): ArgType => {
+    if (!isOptionalType(t)) return t;
+    if (t === 'optional-none') return 'uint'; // default base
+    const m = t.replace('optional-some-', '') as ArgType;
+    return (['uint','int','bool','principal','ascii','utf8','buffer-hex'] as ArgType[]).includes(m) ? m : 'uint';
+  }, [isOptionalType]);
+  const toOptional = React.useCallback((base: ArgType, mode: Row['opt']): ArgType => {
+    if (!mode) return base;
+    if (mode === 'none') return 'optional-none' as ArgType;
+    return (`optional-some-${base}`) as ArgType;
+  }, []);
+
   // Apply preset rows when provided
   React.useEffect(() => {
     if (preset) {
@@ -58,22 +76,7 @@ export default function ClarityArgBuilder({ onChange, preset, paramMeta }: { onC
     setRows((r) => r.map((x) => (x.id === id ? { ...x, ...patch } : x)));
   };
 
-  const isOptionalType = React.useCallback((t: ArgType): boolean => t.startsWith('optional-'), []);
-  const inferOptionalMode = React.useCallback((t: ArgType): Row['opt'] => {
-    if (!isOptionalType(t)) return null;
-    return t === 'optional-none' ? 'none' : 'some';
-  }, [isOptionalType]);
-  const baseFromOptional = React.useCallback((t: ArgType): ArgType => {
-    if (!isOptionalType(t)) return t;
-    if (t === 'optional-none') return 'uint'; // default base
-    const m = t.replace('optional-some-', '') as ArgType;
-    return (['uint','int','bool','principal','ascii','utf8','buffer-hex'] as ArgType[]).includes(m) ? m : 'uint';
-  }, [isOptionalType]);
-  const toOptional = React.useCallback((base: ArgType, mode: Row['opt']): ArgType => {
-    if (!mode) return base;
-    if (mode === 'none') return 'optional-none' as ArgType;
-    return (`optional-some-${base}`) as ArgType;
-  }, []);
+  // (moved helpers above)
 
   const build = React.useCallback((): BuiltArgs => {
     const cvs: ClarityValue[] = [];
