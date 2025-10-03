@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Conxian UI
 
-## Getting Started
+Next.js app for interacting with Conxian contracts on Stacks. Includes dynamic contract routing, transaction templates, and a Pools dashboard with KPIs.
 
-First, run the development server:
+### Requirements
+
+- Node.js 20+
+- A Core API URL (Hiro): mainnet/testnet/devnet
+
+### Environment
+
+- `NEXT_PUBLIC_CORE_API_URL` (browser + server)
+  - Defaults to `https://api.testnet.hiro.so`
+  - Network is inferred from the URL: `devnet` if localhost, `testnet` if contains `testnet`, else `mainnet`.
+
+### Run (Dev)
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+NEXT_PUBLIC_CORE_API_URL=https://api.testnet.hiro.so npm run dev
+# App will start at http://localhost:3000 (or next available port)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Build & Start (Prod)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build
+npm start
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Features
 
-## Learn More
+- Clarity Argument Builder
+  - Per-row Optional toggle: wrap values as `some(...)` or `none`
+  - Supports base types: `uint`, `int`, `bool`, `principal`, `ascii`, `utf8`, `buffer-hex`
+- Transactions (/tx)
+  - Templates (ABI-checked):
+    - SIP-010: `transfer`, `approve`, `transfer-from`
+    - Pools: `add-liquidity`, `remove-liquidity`, `swap-exact-in`, `swap-exact-out`
+  - Wallet call via `@stacks/connect`
+- Router (/router)
+  - ABI fetched dynamically; function dropdown populated from contract ABI
+  - Preset inputs maintained for quick estimate flows
+- Pools (/pools)
+  - Read-only calls: `get-reserves`, `get-total-supply`, `get-price`, `get-fee-info`, `get-pool-performance`
+  - Derived KPIs: LP/Protocol/Total fees (bps), Price X/Y, Price Y/X, Inventory Skew, 24h Volume, 24h Fees, TVL (A units)
 
-To learn more about Next.js, take a look at the following resources:
+### Smoke Tests
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Wallet connect button in navbar
+- Transactions
+  - Open `/tx`, pick a template, confirm function + args populated, click Open Wallet
+- Router
+  - Open `/router`, confirm function list is populated from ABI, run an estimate
+- Pools
+  - Open `/pools`, select a pool, click refresh; verify KPIs render
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Notes
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Contract ABIs are retrieved on demand from the configured Core API via `GET /v2/contracts/interface/{principal}/{name}`.
+- Read-only calls are sent via `POST /v2/contracts/call-read/...` with hex-encoded Clarity args.
+- If a template function is not present in the selected contract ABI, the UI will show a "Template not supported" status.
