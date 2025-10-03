@@ -10,6 +10,10 @@ import { createNetwork } from "@stacks/network";
 import type { StacksNetwork } from "@stacks/network";
 import { getContractInterface } from "@/lib/coreApi";
 
+type AbiArg = { name?: string; type?: unknown };
+type AbiFn = { name?: string; args?: AbiArg[] };
+type ContractAbi = { functions?: AbiFn[] };
+
 function getNetwork(): StacksNetwork {
   const name = (AppConfig.network as 'mainnet' | 'testnet' | 'devnet');
   if (name === 'devnet') {
@@ -25,6 +29,10 @@ export default function TxPage() {
   const [presetRows, setPresetRows] = React.useState<Array<{ type: ArgType; value?: string }> | undefined>(undefined);
   const [sending, setSending] = React.useState(false);
   const [status, setStatus] = React.useState<string>("");
+  const [abiFunctions, setAbiFunctions] = React.useState<string[]>([]);
+  const [abiLoading, setAbiLoading] = React.useState<boolean>(false);
+  const [mode, setMode] = React.useState<'basic' | 'advanced'>('basic');
+  const [abiFns, setAbiFns] = React.useState<AbiFn[]>([]);
 
   const onBuild = (built: BuiltArgs) => {
     setArgs(built);
@@ -64,24 +72,59 @@ export default function TxPage() {
 
   const contracts = [...Tokens, ...CoreContracts];
 
-  async function hasFunction(contractId: string, fn: string): Promise<boolean> {
-    const [addr, name] = contractId.split(".");
-    const abi = await getContractInterface(addr, name);
-    let names: string[] = [];
-    if (abi && typeof abi === 'object' && 'functions' in (abi as Record<string, unknown>)) {
-      const list = (abi as Record<string, unknown>).functions;
-      if (Array.isArray(list)) {
-        names = list
-          .map((f: unknown) => {
-            if (typeof f === 'object' && f !== null && 'name' in (f as Record<string, unknown>)) {
-              const n = (f as Record<string, unknown>).name;
-              return typeof n === 'string' ? n : undefined;
-            }
-            return undefined;
-          })
+  // Load ABI and extract function names when contract changes
+  React.useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      setAbiLoading(true);
+      try {
+        const [addr, name] = selected.split(".");
+        const abi = (await getContractInterface(addr, name)) as ContractAbi | null;
+        const fns: AbiFn[] = Array.isArray(abi?.functions) ? (abi!.functions as AbiFn[]) : [];
+        const names: string[] = fns
+          .map((f) => (typeof f?.name === 'string' ? (f.name as string) : undefined))
           .filter((n): n is string => typeof n === 'string');
+        if (!cancelled) {
+          setAbiFunctions(names);
+          setAbiFns(fns);
+        }
+      } catch {
+        if (!cancelled) setAbiFunctions([]);
+      } finally {
+        if (!cancelled) setAbiLoading(false);
       }
     }
+    load();
+    return () => { cancelled = true; };
+  }, [selected]);
+
+  // Keep fnName consistent with available abiFunctions without re-fetching
+  React.useEffect(() => {
+    if (fnName && abiFunctions.length > 0 && !abiFunctions.includes(fnName)) {
+      setFnName("");
+    }
+  }, [abiFunctions, fnName]);
+
+  const paramMeta = React.useMemo(() => {
+    if (!fnName) return undefined;
+    const fn = abiFns.find((f) => f?.name === fnName);
+    const args = Array.isArray(fn?.args) ? fn!.args : undefined;
+    if (!args) return undefined;
+    const toType = (t: unknown): string | undefined => {
+      if (typeof t === 'string') return t;
+      try { return t ? JSON.stringify(t) : undefined; } catch { return undefined; }
+    };
+    return args.map((a) => ({ name: typeof a?.name === 'string' ? a.name : undefined, type: toType(a?.type) }));
+  }, [fnName, abiFns]);
+
+  async function hasFunction(contractId: string, fn: string): Promise<boolean> {
+    const [addr, name] = contractId.split(".");
+    const abi = (await getContractInterface(addr, name)) as ContractAbi | null;
+    const names: string[] = Array.isArray(abi?.functions)
+      ? (abi!.functions as AbiFn[])
+          .map((f) => (typeof f?.name === 'string' ? (f.name as string) : undefined))
+          .filter((n): n is string => typeof n === 'string')
+      : [];
     return names.includes(fn);
   }
 
@@ -179,33 +222,83 @@ export default function TxPage() {
     <div className="min-h-screen w-full p-6 sm:p-10 space-y-8">
       <header className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Transactions</h1>
-        <div className="text-sm text-gray-600">Network: {AppConfig.network}</div>
+        <div className="text-sm flex items-center gap-2" aria-label="Current network">
+          <span className="text-gray-600">Network</span>
+          <span
+            className={`px-2 py-0.5 rounded-full text-xs font-medium border
+              ${AppConfig.network === 'mainnet' ? 'bg-red-50 text-red-700 border-red-200' :
+                AppConfig.network === 'testnet' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' :
+                'bg-green-50 text-green-700 border-green-200'}`}
+          >
+            {AppConfig.network}
+          </span>
+        </div>
       </header>
 
-      <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-4 space-y-4">
+      <form
+        className="rounded-lg border border-gray-200 dark:border-gray-700 p-4 space-y-4"
+        onSubmit={(e) => { e.preventDefault(); onSubmit(); }}
+        noValidate
+      >
+        {/* Interface Mode toggle */}
+        <div className="flex items-center gap-4" role="radiogroup" aria-labelledby="mode-label">
+          <span id="mode-label" className="text-xs">Interface Mode</span>
+          <label className="text-xs flex items-center gap-1">
+            <input type="radio" name="ui-mode" value="basic" checked={mode === 'basic'} onChange={() => setMode('basic')} />
+            Basic
+          </label>
+          <label className="text-xs flex items-center gap-1">
+            <input type="radio" name="ui-mode" value="advanced" checked={mode === 'advanced'} onChange={() => setMode('advanced')} />
+            Advanced
+          </label>
+        </div>
+
         <div className="grid gap-3 md:grid-cols-3">
           <div>
-            <label className="text-xs block mb-1">Contract</label>
-            <select aria-label="Contract" className="border rounded px-2 py-1 w-full" value={selected} onChange={e => setSelected(e.target.value)}>
+            <label htmlFor="contract-select" className="text-xs block mb-1">Contract</label>
+            <select id="contract-select" aria-label="Contract" className="border rounded px-2 py-1 w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2" value={selected} onChange={e => setSelected(e.target.value)}>
               {contracts.map(c => (
                 <option key={c.id} value={c.id}>{c.label} — {c.id}</option>
               ))}
             </select>
           </div>
+          {mode === 'advanced' && (
+            <div>
+              <label htmlFor="function-select" className="text-xs block mb-1">Function</label>
+              {abiFunctions.length > 0 ? (
+                <select
+                  id="function-select"
+                  className="border rounded px-2 py-1 w-full"
+                  value={fnName}
+                  onChange={(e) => setFnName(e.target.value)}
+                >
+                  <option value="" disabled>{abiLoading ? 'Loading...' : 'Choose function'}</option>
+                  {abiFunctions.map((n) => (
+                    <option key={n} value={n}>{n}</option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  id="function-select"
+                  aria-label="Function name"
+                  className="border rounded px-2 py-1 w-full"
+                  value={fnName}
+                  onChange={(e) => setFnName(e.target.value)}
+                  placeholder={abiLoading ? 'Loading ABI...' : 'Function name'}
+                />
+              )}
+            </div>
+          )}
           <div>
-            <label className="text-xs block mb-1">Function</label>
-            <input aria-label="Function name" className="border rounded px-2 py-1 w-full" value={fnName} onChange={e => setFnName(e.target.value)} placeholder="swap-exact-in" />
-          </div>
-          <div>
-            <label className="text-xs block mb-1">Network</label>
-            <input className="border rounded px-2 py-1 w-full" value={AppConfig.network} readOnly />
+            <label htmlFor="network" className="text-xs block mb-1">Network</label>
+            <input id="network" aria-label="Network" className="border rounded px-2 py-1 w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2" value={AppConfig.network} readOnly />
           </div>
         </div>
 
         <div className="grid gap-3 md:grid-cols-3">
           <div>
-            <label className="text-xs block mb-1">Template</label>
-            <select aria-label="Template" className="border rounded px-2 py-1 w-full" onChange={e => applyTemplate(e.target.value)} defaultValue="">
+            <label htmlFor="template-select" className="text-xs block mb-1">Template</label>
+            <select id="template-select" aria-label="Template" aria-describedby="template-help" className="border rounded px-2 py-1 w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2" onChange={e => applyTemplate(e.target.value)} defaultValue="">
               <option value="">None</option>
               <option value="sip10-transfer">SIP-010 transfer</option>
               <option value="sip10-approve">SIP-010 approve</option>
@@ -215,18 +308,60 @@ export default function TxPage() {
               <option value="pool-swap-exact-in">Pool swap-exact-in</option>
               <option value="pool-swap-exact-out">Pool swap-exact-out</option>
             </select>
+            <div id="template-help" className="text-xs text-gray-500 mt-1">Choose a template to prefill common arguments. Advanced editor is available below.</div>
           </div>
         </div>
 
-        <ClarityArgBuilder onChange={onBuild} preset={presetRows} />
+        {mode === 'advanced' ? (
+          <ClarityArgBuilder onChange={onBuild} preset={presetRows} paramMeta={paramMeta} />
+        ) : (
+          <details>
+            <summary className="text-xs cursor-pointer">Show advanced argument editor</summary>
+            <div className="mt-2">
+              <ClarityArgBuilder onChange={onBuild} preset={presetRows} paramMeta={paramMeta} />
+            </div>
+          </details>
+        )}
+
+        {/* Transaction preview */}
+        <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3 space-y-2">
+          <h3 className="text-sm font-medium">Preview</h3>
+          <div className="text-xs text-gray-600">Contract: <code>{selected}</code></div>
+          <div className="text-xs text-gray-600">Function: <code>{fnName || '-'}</code></div>
+          <div className="text-xs text-gray-600">
+            Args (hex): {args.hex.length > 0 ? (
+              <span className="break-all">[{args.hex.map((h, i) => (
+                <span key={i} className="inline-block mr-1">{h}{i < args.hex.length - 1 ? ',' : ''}</span>
+              ))}]</span>
+            ) : (
+              <span>-</span>
+            )}
+          </div>
+          <div>
+            <button
+              type="button"
+              className="text-xs px-2 py-1 rounded border border-gray-300 dark:border-gray-600"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(JSON.stringify(args.hex));
+                } catch {
+                  // noop
+                }
+              }}
+              disabled={args.hex.length === 0}
+            >
+              Copy Args (hex)
+            </button>
+          </div>
+        </div>
 
         <div className="flex items-center gap-3">
-          <button onClick={onSubmit} disabled={sending || !fnName} className="text-sm px-3 py-1.5 rounded-md border border-gray-300 dark:border-gray-600">
+          <button type="submit" disabled={sending || !fnName} aria-busy={sending} className="text-sm px-3 py-1.5 rounded-md border border-gray-300 dark:border-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:opacity-60">
             {sending ? "Sending..." : "Open Wallet"}
           </button>
-          {status && <div className="text-xs text-gray-600">{status}</div>}
+          {status && <div role="status" aria-live="polite" className="text-xs text-gray-600">{status}</div>}
         </div>
-      </div>
+      </form>
     </div>
   );
 }
