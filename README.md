@@ -27,7 +27,58 @@ npm run build
 npm start
 ```
 
-### Features
+### Backend Alignment
+
+This frontend is aligned with the Conxian DeFi protocol backend contracts. Key contracts include:
+
+#### Core Contracts
+- **DEX Factory V2** (`dex-factory-v2`): Factory for creating liquidity pools
+- **DEX Router** (`dex-router`): Multi-hop routing for token swaps
+- **Oracle Aggregator** (`oracle-aggregator`): Price feed aggregation
+- **Vault** (`vault`): Main liquidity vault
+- **Circuit Breaker** (`circuit-breaker`): Emergency pause mechanism
+- **Bond Factory** (`bond-factory`): Bond issuance system
+
+#### Tokens
+- **CXD Token** (`cxd-token`): Protocol governance token
+- **CXVG Token** (`cxvg-token`): Vault governance token
+- **CXTR Token** (`cxtr-token`): Treasury token
+- **CXS Token** (`cxs-token`): Staking token
+- **CXLP Token** (`cxlp-token`): Liquidity provider token
+
+#### Monitoring & Security
+- **Analytics Aggregator** (`analytics-aggregator`): Protocol analytics
+- **Performance Optimizer** (`performance-optimizer`): Performance monitoring
+- **Finance Metrics** (`finance-metrics`): Financial KPIs
+- **Audit Registry** (`audit-registry`): Security audit tracking
+- **MEV Protector** (`mev-protector`): MEV protection
+
+### Contract Interaction System
+
+The application includes a comprehensive contract interaction system (`src/lib/contract-interactions.ts`) that provides:
+
+- **Read-only function calls**: Query contract state without transactions
+- **Public function calls**: Execute transactions through user wallets
+- **Type-safe interfaces**: Proper TypeScript types for all contract interactions
+- **Error handling**: Comprehensive error handling for network and contract issues
+
+### Testing
+
+Run the test suite to verify contract interactions:
+
+```bash
+npm test        # Interactive test runner
+npm run test:run # Run tests once
+npm run test:ui  # Visual test interface
+```
+
+Tests cover:
+- Contract function calls
+- Error handling scenarios
+- Configuration validation
+- Integration with Stacks network
+
+### Development
 
 - Clarity Argument Builder
   - Per-row Optional toggle: wrap values as `some(...)` or `none`
