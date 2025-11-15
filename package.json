@@ -7,13 +7,15 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run"
   },
   "dependencies": {
-    "@stacks/auth": "^7.2.0",
-    "@stacks/connect": "8.2.0",
-    "@stacks/network": "^7.2.0",
-    "@stacks/transactions": "^7.2.0",
+    "@stacks/auth": "7.2.0",
+    "@stacks/connect": "8.1.9",
+    "@stacks/network": "7.2.0",
+    "@stacks/transactions": "7.2.0",
     "next": "15.5.4",
     "react": "19.2.0",
     "react-dom": "19.2.0"
@@ -24,9 +26,11 @@
     "@types/node": "24.6.2",
     "@types/react": "^19",
     "@types/react-dom": "19.2.0",
+    "@vitest/ui": "^3.2.4",
     "eslint": "9.36.0",
     "eslint-config-next": "15.5.2",
     "tailwindcss": "^4",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vitest": "^3.2.4"
   }
 }

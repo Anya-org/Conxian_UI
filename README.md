@@ -1,36 +1,112 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Conxian UI
 
-## Getting Started
+Next.js app for interacting with Conxian contracts on Stacks. Includes dynamic contract routing, transaction templates, and a Pools dashboard with KPIs.
 
-First, run the development server:
+### Requirements
+
+- Node.js 20+
+- A Core API URL (Hiro): mainnet/testnet/devnet
+
+### Environment
+
+- `NEXT_PUBLIC_CORE_API_URL` (browser + server)
+  - Defaults to `https://api.testnet.hiro.so`
+  - Network is inferred from the URL: `devnet` if localhost, `testnet` if contains `testnet`, else `mainnet`.
+
+### Run (Dev)
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+NEXT_PUBLIC_CORE_API_URL=https://api.testnet.hiro.so npm run dev
+# App will start at http://localhost:3000 (or next available port)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Build & Start (Prod)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build
+npm start
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Backend Alignment
 
-## Learn More
+This frontend is aligned with the Conxian DeFi protocol backend contracts. Key contracts include:
 
-To learn more about Next.js, take a look at the following resources:
+#### Core Contracts
+- **DEX Factory V2** (`dex-factory-v2`): Factory for creating liquidity pools
+- **DEX Router** (`dex-router`): Multi-hop routing for token swaps
+- **Oracle Aggregator** (`oracle-aggregator`): Price feed aggregation
+- **Vault** (`vault`): Main liquidity vault
+- **Circuit Breaker** (`circuit-breaker`): Emergency pause mechanism
+- **Bond Factory** (`bond-factory`): Bond issuance system
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+#### Tokens
+- **CXD Token** (`cxd-token`): Protocol governance token
+- **CXVG Token** (`cxvg-token`): Vault governance token
+- **CXTR Token** (`cxtr-token`): Treasury token
+- **CXS Token** (`cxs-token`): Staking token
+- **CXLP Token** (`cxlp-token`): Liquidity provider token
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+#### Monitoring & Security
+- **Analytics Aggregator** (`analytics-aggregator`): Protocol analytics
+- **Performance Optimizer** (`performance-optimizer`): Performance monitoring
+- **Finance Metrics** (`finance-metrics`): Financial KPIs
+- **Audit Registry** (`audit-registry`): Security audit tracking
+- **MEV Protector** (`mev-protector`): MEV protection
 
-## Deploy on Vercel
+### Contract Interaction System
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The application includes a comprehensive contract interaction system (`src/lib/contract-interactions.ts`) that provides:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Read-only function calls**: Query contract state without transactions
+- **Public function calls**: Execute transactions through user wallets
+- **Type-safe interfaces**: Proper TypeScript types for all contract interactions
+- **Error handling**: Comprehensive error handling for network and contract issues
+
+### Testing
+
+Run the test suite to verify contract interactions:
+
+```bash
+npm test        # Interactive test runner
+npm run test:run # Run tests once
+npm run test:ui  # Visual test interface
+```
+
+Tests cover:
+- Contract function calls
+- Error handling scenarios
+- Configuration validation
+- Integration with Stacks network
+
+### Development
+
+- Clarity Argument Builder
+  - Per-row Optional toggle: wrap values as `some(...)` or `none`
+  - Supports base types: `uint`, `int`, `bool`, `principal`, `ascii`, `utf8`, `buffer-hex`
+- Transactions (/tx)
+  - Templates (ABI-checked):
+    - SIP-010: `transfer`, `approve`, `transfer-from`
+    - Pools: `add-liquidity`, `remove-liquidity`, `swap-exact-in`, `swap-exact-out`
+  - Wallet call via `@stacks/connect`
+- Router (/router)
+  - ABI fetched dynamically; function dropdown populated from contract ABI
+  - Preset inputs maintained for quick estimate flows
+- Pools (/pools)
+  - Read-only calls: `get-reserves`, `get-total-supply`, `get-price`, `get-fee-info`, `get-pool-performance`
+  - Derived KPIs: LP/Protocol/Total fees (bps), Price X/Y, Price Y/X, Inventory Skew, 24h Volume, 24h Fees, TVL (A units)
+
+### Smoke Tests
+
+- Wallet connect button in navbar
+- Transactions
+  - Open `/tx`, pick a template, confirm function + args populated, click Open Wallet
+- Router
+  - Open `/router`, confirm function list is populated from ABI, run an estimate
+- Pools
+  - Open `/pools`, select a pool, click refresh; verify KPIs render
+
+### Notes
+
+- Contract ABIs are retrieved on demand from the configured Core API via `GET /v2/contracts/interface/{principal}/{name}`.
+- Read-only calls are sent via `POST /v2/contracts/call-read/...` with hex-encoded Clarity args.
+- If a template function is not present in the selected contract ABI, the UI will show a "Template not supported" status.

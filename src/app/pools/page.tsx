@@ -17,22 +17,25 @@ export default function PoolsPage() {
   const [totalSupply, setTotalSupply] = React.useState<ReadOnlyResponse | null>(null);
   const [price, setPrice] = React.useState<ReadOnlyResponse | null>(null);
   const [feeInfo, setFeeInfo] = React.useState<ReadOnlyResponse | null>(null);
+  const [perf, setPerf] = React.useState<ReadOnlyResponse | null>(null);
 
   const refresh = React.useCallback(async () => {
     if (!selected) return;
     const [contractAddress, contractName] = selected.split('.') as [string, string];
     setLoading(true);
     try {
-      const [r1, r2, r3, r4] = await Promise.all([
+      const [r1, r2, r3, r4, r5] = await Promise.all([
         callReadOnly(contractAddress, contractName, 'get-reserves', DEFAULT_SENDER, []),
         callReadOnly(contractAddress, contractName, 'get-total-supply', DEFAULT_SENDER, []),
         callReadOnly(contractAddress, contractName, 'get-price', DEFAULT_SENDER, []),
         callReadOnly(contractAddress, contractName, 'get-fee-info', DEFAULT_SENDER, []),
+        callReadOnly(contractAddress, contractName, 'get-pool-performance', DEFAULT_SENDER, []),
       ]);
       setReserves(r1);
       setTotalSupply(r2);
       setPrice(r3);
       setFeeInfo(r4);
+      setPerf(r5);
     } finally {
       setLoading(false);
     }
@@ -86,7 +89,7 @@ export default function PoolsPage() {
           </div>
           <div className="rounded border border-gray-200 dark:border-gray-700 p-3">
             <div className="font-medium mb-1">Derived KPIs</div>
-            <DerivedKPIs reserves={reserves} price={price} feeInfo={feeInfo} />
+            <DerivedKPIs reserves={reserves} price={price} feeInfo={feeInfo} perf={perf} />
           </div>
         </div>
       </div>
@@ -94,10 +97,11 @@ export default function PoolsPage() {
   );
 }
 
-function DerivedKPIs({ reserves, price, feeInfo }: { reserves: ReadOnlyResponse | null; price: ReadOnlyResponse | null; feeInfo: ReadOnlyResponse | null }) {
+function DerivedKPIs({ reserves, price, feeInfo, perf }: { reserves: ReadOnlyResponse | null; price: ReadOnlyResponse | null; feeInfo: ReadOnlyResponse | null; perf: ReadOnlyResponse | null }) {
   const r = (reserves && 'result' in reserves) ? decodeResultHex(reserves.result) : null;
   const p = (price && 'result' in price) ? decodeResultHex(price.result) : null;
   const f = (feeInfo && 'result' in feeInfo) ? decodeResultHex(feeInfo.result) : null;
+  const pr = (perf && 'result' in perf) ? decodeResultHex(perf.result) : null;
 
   const reserveAU = getUint(getTupleField(r?.value ?? null, 'reserve-a'));
   const reserveBU = getUint(getTupleField(r?.value ?? null, 'reserve-b'));
@@ -105,11 +109,15 @@ function DerivedKPIs({ reserves, price, feeInfo }: { reserves: ReadOnlyResponse 
   const priceYXU = getUint(getTupleField(p?.value ?? null, 'price-y-x'));
   const lpFeeBpsU = getUint(getTupleField(f?.value ?? null, 'lp-fee-bps'));
   const protocolFeeBpsU = getUint(getTupleField(f?.value ?? null, 'protocol-fee-bps'));
+  const vol24hU = getUint(getTupleField(pr?.value ?? null, 'volume-24h'));
+  const fees24hU = getUint(getTupleField(pr?.value ?? null, 'fees-24h'));
 
   const lpFeeBps = lpFeeBpsU !== null ? Number(lpFeeBpsU) : null;
   const protocolFeeBps = protocolFeeBpsU !== null ? Number(protocolFeeBpsU) : null;
   const totalFeeBps = (lpFeeBps ?? 0) + (protocolFeeBps ?? 0);
   const inventorySkew = reserveAU !== null && reserveBU !== null ? Number(reserveAU) / Math.max(1, Number(reserveBU)) : null;
+  // TVL in A-units: reserveA + reserveB converted via Y->X
+  const tvlAUnits = reserveAU !== null && reserveBU !== null && priceYXU !== null ? Number(reserveAU) + Number(reserveBU) * Number(priceYXU) / 1 : null;
 
   return (
     <div className="text-xs space-y-1">
@@ -119,6 +127,9 @@ function DerivedKPIs({ reserves, price, feeInfo }: { reserves: ReadOnlyResponse 
       <div><span className="font-medium">Price X/Y:</span> {priceXYU !== null ? Number(priceXYU) : '—'}</div>
       <div><span className="font-medium">Price Y/X:</span> {priceYXU !== null ? Number(priceYXU) : '—'}</div>
       <div><span className="font-medium">Inventory Skew (A/B):</span> {inventorySkew !== null ? inventorySkew.toFixed(4) : '—'}</div>
+      <div><span className="font-medium">Volume (24h):</span> {vol24hU !== null ? Number(vol24hU) : '—'}</div>
+      <div><span className="font-medium">Fees (24h):</span> {fees24hU !== null ? Number(fees24hU) : '—'}</div>
+      <div><span className="font-medium">TVL (A units):</span> {tvlAUnits !== null ? tvlAUnits.toFixed(2) : '—'}</div>
     </div>
   );
 }

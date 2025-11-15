@@ -35,16 +35,45 @@ export type ArgType =
 
 export type BuiltArgs = { cv: ClarityValue[]; hex: string[] };
 
-export default function ClarityArgBuilder({ onChange, preset }: { onChange: (args: BuiltArgs) => void; preset?: Array<{ type: ArgType; value?: string }> }) {
+export default function ClarityArgBuilder({ onChange, preset, paramMeta }: { onChange: (args: BuiltArgs) => void; preset?: Array<{ type: ArgType; value?: string }>; paramMeta?: Array<{ name?: string; type?: string }> }) {
   type Row = { id: string; type: ArgType; value: string; opt?: 'none' | 'some' | null };
   const [rows, setRows] = React.useState<Row[]>([]);
+
+  // Helpers (defined before useEffect usage to satisfy TS)
+  const isOptionalType = React.useCallback((t: ArgType): boolean => t.startsWith('optional-'), []);
+  const inferOptionalMode = React.useCallback((t: ArgType): Row['opt'] => {
+    if (!isOptionalType(t)) return null;
+    return t === 'optional-none' ? 'none' : 'some';
+  }, [isOptionalType]);
+  const baseFromOptional = React.useCallback((t: ArgType): ArgType => {
+    if (!isOptionalType(t)) return t;
+    if (t === 'optional-none') return 'uint'; // default base
+    const m = t.replace('optional-some-', '') as ArgType;
+    return (['uint','int','bool','principal','ascii','utf8','buffer-hex'] as ArgType[]).includes(m) ? m : 'uint';
+  }, [isOptionalType]);
+  const toOptional = React.useCallback((base: ArgType, mode: Row['opt']): ArgType => {
+    if (!mode) return base;
+    if (mode === 'none') return 'optional-none' as ArgType;
+    return (`optional-some-${base}`) as ArgType;
+  }, []);
 
   // Apply preset rows when provided
   React.useEffect(() => {
     if (preset) {
-      setRows(preset.map(p => ({ id: crypto.randomUUID(), type: p.type, value: p.value ?? "", opt: inferOptionalMode(p.type) })));
+      const built = preset.map(p => {
+        const opt: Row['opt'] = isOptionalType(p.type)
+          ? (p.type === 'optional-none' ? 'none' : 'some')
+          : null;
+        return {
+          id: crypto.randomUUID(),
+          type: p.type,
+          value: p.value ?? "",
+          opt,
+        };
+      });
+      setRows(built);
     }
-  }, [preset, inferOptionalMode]);
+  }, [preset, isOptionalType]);
 
   const addRow = () => {
     setRows((r) => [...r, { id: crypto.randomUUID(), type: "uint", value: "", opt: null }]);
@@ -58,24 +87,7 @@ export default function ClarityArgBuilder({ onChange, preset }: { onChange: (arg
     setRows((r) => r.map((x) => (x.id === id ? { ...x, ...patch } : x)));
   };
 
-  function isOptionalType(t: ArgType): boolean {
-    return t.startsWith('optional-');
-  }
-  function inferOptionalMode(t: ArgType): Row['opt'] {
-    if (!isOptionalType(t)) return null;
-    return t === 'optional-none' ? 'none' : 'some';
-  }
-  function baseFromOptional(t: ArgType): ArgType {
-    if (!isOptionalType(t)) return t;
-    if (t === 'optional-none') return 'uint'; // default base
-    const m = t.replace('optional-some-', '') as ArgType;
-    return (['uint','int','bool','principal','ascii','utf8','buffer-hex'] as ArgType[]).includes(m) ? m : 'uint';
-  }
-  function toOptional(base: ArgType, mode: Row['opt']): ArgType {
-    if (!mode) return base;
-    if (mode === 'none') return 'optional-none' as ArgType;
-    return (`optional-some-${base}`) as ArgType;
-  }
+  // (moved helpers above)
 
   const build = React.useCallback((): BuiltArgs => {
     const cvs: ClarityValue[] = [];
@@ -159,28 +171,28 @@ export default function ClarityArgBuilder({ onChange, preset }: { onChange: (arg
     }
     const hex = cvs.map((cv) => cvToHex(cv));
     return { cv: cvs, hex };
-  }, [rows, isOptionalType, toOptional, baseFromOptional]);
+  }, [rows, isOptionalType, toOptional]);
 
   React.useEffect(() => {
     onChange(build());
   }, [rows, build, onChange]);
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h3 className="font-medium">Function Arguments</h3>
+    <fieldset className="space-y-3" aria-describedby="args-help">
+      <legend className="font-medium">Function Arguments</legend>
+      <div className="flex items-center justify-end">
         <button type="button" onClick={addRow} className="text-xs px-2 py-1 rounded border border-gray-300 dark:border-gray-600">
           Add Arg
         </button>
       </div>
-      {rows.length === 0 && <div className="text-xs text-gray-500">No args. Click Add Arg.</div>}
+      {rows.length === 0 && <div id="args-help" className="text-xs text-gray-500">No args. Click Add Arg.</div>}
       <div className="space-y-2">
-        {rows.map((row) => (
+        {rows.map((row, idx) => (
           <div key={row.id} className="grid gap-2 md:grid-cols-6 items-center">
-            <label className="text-xs col-span-1">Type</label>
+            <label htmlFor={`arg-type-${row.id}`} className="text-xs col-span-1">Type</label>
             <select
-              aria-label="Arg type"
-              className="border rounded px-2 py-1 col-span-2"
+              id={`arg-type-${row.id}`}
+              className="border rounded px-2 py-1 col-span-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
               value={row.type}
               onChange={(e) => updateRow(row.id, { type: e.target.value as ArgType })}
             >
@@ -201,8 +213,8 @@ export default function ClarityArgBuilder({ onChange, preset }: { onChange: (arg
               <option value="optional-some-buffer-hex">optional-some-buffer-hex</option>
             </select>
             <div className="col-span-3 flex items-center gap-2">
-              <label className="text-xs">Optional</label>
-              <input aria-label="Optional toggle" type="checkbox" checked={Boolean(row.opt) || isOptionalType(row.type)} onChange={(e) => {
+              <label htmlFor={`arg-optional-toggle-${row.id}`} className="text-xs">Optional</label>
+              <input id={`arg-optional-toggle-${row.id}`} type="checkbox" className="focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2" checked={Boolean(row.opt) || isOptionalType(row.type)} onChange={(e) => {
                 const enabled = e.target.checked;
                 if (!enabled) {
                   // turn off optional wrapper
@@ -215,7 +227,7 @@ export default function ClarityArgBuilder({ onChange, preset }: { onChange: (arg
                 }
               }} />
               {(Boolean(row.opt) || isOptionalType(row.type)) && (
-                <select aria-label="Optional kind" className="border rounded px-2 py-1" value={row.opt ?? inferOptionalMode(row.type) ?? 'some'} onChange={(e) => {
+                <select id={`arg-optional-kind-${row.id}`} aria-label="Optional kind" className="border rounded px-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2" value={row.opt ?? inferOptionalMode(row.type) ?? 'some'} onChange={(e) => {
                   const mode = e.target.value as Row['opt'];
                   const base = baseFromOptional(row.type);
                   updateRow(row.id, { type: toOptional(base, mode), opt: mode });
@@ -225,22 +237,92 @@ export default function ClarityArgBuilder({ onChange, preset }: { onChange: (arg
                 </select>
               )}
             </div>
-            <label className="text-xs col-span-1">Value</label>
-            <input
-              aria-label="Arg value"
-              className="border rounded px-2 py-1 col-span-2"
-              value={row.value}
-              onChange={(e) => updateRow(row.id, { value: e.target.value })}
-              placeholder={row.type === "bool" ? "true | false" : row.type === "principal" ? "ST..." : ""}
-            />
+            {/* Value control: type-specific and disabled when optional is none */}
+            {(() => {
+              const optionalEnabled = Boolean(row.opt) || isOptionalType(row.type);
+              const optionalKind = row.opt ?? inferOptionalMode(row.type) ?? 'some';
+              const isNone = optionalEnabled && optionalKind === 'none';
+              const base = baseFromOptional(row.type);
+              const meta = paramMeta?.[idx];
+              const labelText = `Value${meta ? ` — ${meta.name ?? 'arg'}${meta.type ? ` (${meta.type})` : ''}` : ''}`;
+              if (isNone) {
+                return (
+                  <>
+                    <label htmlFor={`arg-value-${row.id}`} className="text-xs col-span-1">{labelText}</label>
+                    <input id={`arg-value-${row.id}`} className="border rounded px-2 py-1 col-span-2 opacity-50" disabled aria-disabled="true" value="" readOnly />
+                  </>
+                );
+              }
+              if (base === 'bool') {
+                const checked = (row.value || '').toLowerCase() === 'true';
+                return (
+                  <>
+                    <label htmlFor={`arg-value-${row.id}`} className="text-xs col-span-1">{labelText}</label>
+                    <input
+                      id={`arg-value-${row.id}`}
+                      type="checkbox"
+                      className="col-span-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                      checked={checked}
+                      onChange={(e) => updateRow(row.id, { value: e.target.checked ? 'true' : 'false' })}
+                    />
+                  </>
+                );
+              }
+              if (base === 'uint' || base === 'int') {
+                return (
+                  <>
+                    <label htmlFor={`arg-value-${row.id}`} className="text-xs col-span-1">{labelText}</label>
+                    <input
+                      id={`arg-value-${row.id}`}
+                      type="number"
+                      inputMode="numeric"
+                      step="1"
+                      {...(base === 'uint' ? { min: 0 } : {})}
+                      className="border rounded px-2 py-1 col-span-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                      value={row.value}
+                      onChange={(e) => updateRow(row.id, { value: e.target.value })}
+                    />
+                  </>
+                );
+              }
+              if (base === 'buffer-hex') {
+                return (
+                  <>
+                    <label htmlFor={`arg-value-${row.id}`} className="text-xs col-span-1">{labelText}</label>
+                    <input
+                      id={`arg-value-${row.id}`}
+                      className="border rounded px-2 py-1 col-span-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                      value={row.value}
+                      onChange={(e) => updateRow(row.id, { value: e.target.value })}
+                      placeholder="0x..."
+                      pattern="^(0x)?[0-9a-fA-F]*$"
+                      title="Hex string, with or without 0x prefix"
+                    />
+                  </>
+                );
+              }
+              // default text input for principal/ascii/utf8
+              return (
+                <>
+                  <label htmlFor={`arg-value-${row.id}`} className="text-xs col-span-1">{labelText}</label>
+                  <input
+                    id={`arg-value-${row.id}`}
+                    className="border rounded px-2 py-1 col-span-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                    value={row.value}
+                    onChange={(e) => updateRow(row.id, { value: e.target.value })}
+                    placeholder={base === 'principal' ? 'ST...' : ''}
+                  />
+                </>
+              );
+            })()}
             <div className="text-right">
-              <button type="button" onClick={() => removeRow(row.id)} className="text-xs px-2 py-1 rounded border border-gray-300 dark:border-gray-600">
+              <button type="button" onClick={() => removeRow(row.id)} className="text-xs px-2 py-1 rounded border border-gray-300 dark:border-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
                 Remove
               </button>
             </div>
           </div>
         ))}
       </div>
-    </div>
+    </fieldset>
   );
 }
