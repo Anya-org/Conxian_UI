@@ -1,5 +1,5 @@
 import { fetchCallReadOnlyFunction, Cl, ClarityValue, ContractCallOptions, ReadOnlyFunctionOptions } from '@stacks/transactions';
-import { StacksNetwork } from '@stacks/network';
+import { STACKS_MAINNET, STACKS_TESTNET, StacksNetwork } from '@stacks/network';
 import { openContractCall, FinishedTxData } from '@stacks/connect';
 import { AppConfig } from './config';
 import { CoreContracts, Tokens } from './contracts';
@@ -7,9 +7,15 @@ import { CoreContracts, Tokens } from './contracts';
 // Network configuration
 const getNetwork = (): StacksNetwork => {
   const network = AppConfig.network;
-  return network === 'mainnet'
-    ? new StacksNetwork({ url: 'https://api.hiro.so' })
-    : new StacksNetwork({ url: AppConfig.coreApiUrl });
+  if (network === 'mainnet') {
+    const mainnet = { ...STACKS_MAINNET };
+    mainnet.client.baseUrl = 'https://api.hiro.so';
+    return mainnet;
+  } else {
+    const testnet = { ...STACKS_TESTNET };
+    testnet.client.baseUrl = AppConfig.coreApiUrl;
+    return testnet;
+  }
 };
 
 export type ContractCallResult = {
@@ -37,6 +43,7 @@ export async function callReadOnlyContractFunction(
     options.contractAddress = contractId.split('.')[0];
     options.contractName = contractId.split('.')[1];
     options.functionName = functionName;
+    options.functionArgs = functionArgs;
 
     const result = await fetchCallReadOnlyFunction(options);
     return {
