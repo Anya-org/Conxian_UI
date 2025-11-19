@@ -13,6 +13,14 @@ Next.js app for interacting with Conxian contracts on Stacks. Includes dynamic c
   - Defaults to `https://api.testnet.hiro.so`
   - Network is inferred from the URL: `devnet` if localhost, `testnet` if contains `testnet`, else `mainnet`.
 
+### Installation
+
+```bash
+npm install
+```
+
+After installation, a `prepare` script will automatically create a `src/lib/generated/base.json` file with a default principal. This file is required for the application to build.
+
 ### Run (Dev)
 
 ```bash
