@@ -3,7 +3,7 @@ import {
   ClarityValue,
   ContractCallOptions,
   ReadOnlyFunctionOptions,
-  callReadOnlyFunction,
+  fetchCallReadOnlyFunction,
 } from '@stacks/transactions';
 import { StacksNetwork, STACKS_MAINNET, STACKS_TESTNET } from '@stacks/network';
 import { openContractCall, AppConfig as ConnectAppConfig } from '@stacks/connect';
@@ -12,13 +12,9 @@ import { CoreContracts, Tokens } from './contracts';
 
 // Network configuration
 const getNetwork = (): StacksNetwork => {
-  const network = AppConfig.network;
-  if (network === 'mainnet') {
-    return STACKS_MAINNET;
-  }
-  const customNodeURL = AppConfig.coreApiUrl;
-  const customNetwork = STACKS_TESTNET; // a copy
-  customNetwork.coreApiUrl = customNodeURL;
+  const network = AppConfig.network === 'mainnet' ? STACKS_MAINNET : STACKS_TESTNET;
+  const customNetwork = { ...network };
+  customNetwork.client.baseUrl = AppConfig.coreApiUrl;
   return customNetwork;
 };
 
@@ -39,7 +35,6 @@ const createCallOptions = (
 > => {
   return {
     network: getNetwork(),
-    functionArgs,
   };
 };
 
@@ -56,9 +51,10 @@ export async function callReadOnlyContractFunction(
       contractAddress,
       contractName,
       functionName,
+      functionArgs,
       senderAddress: contractAddress, // arbitrary for read-only
     };
-    const result = await callReadOnlyFunction(options);
+    const result = await fetchCallReadOnlyFunction(options);
     return {
       success: true,
       result,

@@ -9,7 +9,8 @@
     "start": "next start",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "prepare": "node scripts/prepare.cjs"
   },
   "dependencies": {
     "@stacks/auth": "7.2.0",
