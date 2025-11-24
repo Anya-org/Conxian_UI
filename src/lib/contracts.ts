@@ -4,15 +4,16 @@ export type ContractRef = {
   id: string; // principal.contract-name
   label: string;
   kind: 'token' | 'dex' | 'oracle' | 'security' | 'enterprise' | 'rewards' | 'other' | 'monitoring';
+  decimals?: number;
 };
 
 const BASE = (base && typeof base.basePrincipal === 'string' && base.basePrincipal) || 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6';
 
 export const Tokens: ContractRef[] = [
-  { id: `${BASE}.cxd-token`, label: 'CXD Token', kind: 'token' },
-  { id: `${BASE}.cxvg-token`, label: 'CXVG Token', kind: 'token' },
-  { id: `${BASE}.cxtr-token`, label: 'CXTR Token', kind: 'token' },
-  { id: `${BASE}.cxs-token`, label: 'CXS Token', kind: 'token' },
+  { id: `${BASE}.cxd-token`, label: 'CXD Token', kind: 'token', decimals: 6 },
+  { id: `${BASE}.cxvg-token`, label: 'CXVG Token', kind: 'token', decimals: 6 },
+  { id: `${BASE}.cxtr-token`, label: 'CXTR Token', kind: 'token', decimals: 6 },
+  { id: `${BASE}.cxs-token`, label: 'CXS Token', kind: 'token', decimals: 6 },
 ];
 
 export const CoreContracts: ContractRef[] = [
