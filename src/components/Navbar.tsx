@@ -3,6 +3,7 @@ import Link from "next/link";
 export default function Navbar() {
   const links = [
     { href: "/", label: "Dashboard" },
+    { href: "/swap", label: "Swap" },
     { href: "/network", label: "Network" },
     { href: "/tokens", label: "Tokens" },
     { href: "/pools", label: "Pools" },
