@@ -6,7 +6,7 @@ import {
   fetchCallReadOnlyFunction,
 } from '@stacks/transactions';
 import { StacksNetwork, STACKS_MAINNET, STACKS_TESTNET } from '@stacks/network';
-import { openContractCall, AppConfig as ConnectAppConfig } from '@stacks/connect';
+import { request } from '@stacks/connect';
 import { AppConfig } from './config';
 import { CoreContracts, Tokens } from './contracts';
 
@@ -74,26 +74,22 @@ export async function callPublicContractFunction(
   functionArgs: ClarityValue[] = []
 ): Promise<void> {
   const [contractAddress, contractName] = contractId.split('.');
-  const connectAppConfig = new ConnectAppConfig(['store_write', 'publish_data']);
-  await openContractCall({
-    network: getNetwork(),
-    contractAddress,
-    contractName,
-    functionName,
-    functionArgs,
-    appDetails: {
-      name: 'Conxian UI',
-      icon: '/stx.png',
-    },
-    onFinish: (data) => {
-      // (optional)
-      console.log('Transaction finished:', data);
-    },
-    onCancel: () => {
-      // (optional)
-      console.log('Transaction cancelled.');
-    },
-  });
+  try {
+    const result = await request('stx_callContract', {
+      network: getNetwork(),
+      contractAddress,
+      contractName,
+      functionName,
+      functionArgs,
+      appDetails: {
+        name: 'Conxian UI',
+        icon: '/stx.png',
+      },
+    });
+    console.log('Transaction finished:', result);
+  } catch (error) {
+    console.log('Transaction cancelled or failed:', error);
+  }
 }
 
 // Specific contract functions for common operations
