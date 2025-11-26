@@ -73,18 +73,12 @@ export async function callPublicContractFunction(
   functionName: string,
   functionArgs: ClarityValue[] = []
 ): Promise<void> {
-  const [contractAddress, contractName] = contractId.split('.');
   try {
     const result = await request('stx_callContract', {
       network: getNetwork(),
-      contractAddress,
-      contractName,
+      contract: contractId as `${string}.${string}`,
       functionName,
       functionArgs,
-      appDetails: {
-        name: 'Conxian UI',
-        icon: '/stx.png',
-      },
     });
     console.log('Transaction finished:', result);
   } catch (error) {
