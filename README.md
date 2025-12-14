@@ -1,5 +1,7 @@
 ## Conxian UI
 
+![Conxian UI Homepage](docs/images/homepage.png)
+
 Next.js app for interacting with Conxian contracts on Stacks. Includes dynamic contract routing, transaction templates, and a Pools dashboard with KPIs.
 
 ### Requirements
