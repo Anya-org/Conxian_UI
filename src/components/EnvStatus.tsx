@@ -27,12 +27,12 @@ export default function EnvStatus() {
   const indicator = status?.ok ? "bg-green-500" : "bg-red-500";
 
   return (
-    <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-4 w-full max-w-xl">
+    <div className="rounded-xl border border-gray-800 bg-gray-900 p-6 w-full max-w-xl">
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-lg font-semibold">Environment</h2>
         <span className={`inline-block h-2 w-2 rounded-full ${indicator}`} />
       </div>
-      <div className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+      <div className="text-sm text-gray-400 space-y-1">
         <div>
           <span className="font-medium">Core API:</span> {AppConfig.coreApiUrl}
         </div>
@@ -48,11 +48,11 @@ export default function EnvStatus() {
           </div>
         )}
       </div>
-      <div className="mt-3">
+      <div className="mt-4">
         <button
           onClick={refresh}
           disabled={loading}
-          className="text-sm px-3 py-1.5 rounded-md border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800"
+          className="text-sm px-3 py-1.5 rounded-md border border-gray-700 hover:bg-gray-800 transition-colors"
         >
           {loading ? "Refreshing..." : "Refresh"}
         </button>
