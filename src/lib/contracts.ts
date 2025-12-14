@@ -21,6 +21,7 @@ export const CoreContracts: ContractRef[] = [
   { id: `${BASE}.dex-factory-v2`, label: 'DEX Factory', kind: 'dex' },
   { id: `${BASE}.dex-router`, label: 'DEX Router', kind: 'dex' },
   { id: `${BASE}.multi-hop-router-v3`, label: 'Router V3', kind: 'dex' },
+  { id: `${BASE}.vault`, label: 'Vault', kind: 'dex' },
   { id: `${BASE}.bond-factory`, label: 'Bond Factory', kind: 'dex' },
   { id: `${BASE}.oracle-aggregator-v2`, label: 'Oracle Aggregator v2', kind: 'oracle' },
   { id: `${BASE}.circuit-breaker`, label: 'Circuit Breaker', kind: 'security' },
