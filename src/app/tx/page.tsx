@@ -167,7 +167,7 @@ export default function TxPage() {
         { type: 'optional-none' }, // memo
       ]);
     } else if (tpl === 'pool-add-liquidity') {
-      const pool = CoreContracts.find(c => c.id.endsWith('.dex-dex-pool')) || CoreContracts[0];
+      const pool = CoreContracts.find(c => c.kind === 'dex') || CoreContracts[0];
       if (pool) setSelected(pool.id);
       const supported = pool ? await hasFunction(pool.id, 'add-liquidity') : false;
       if (!supported) { setStatus('Template not supported: add-liquidity'); setPresetRows(undefined); return; }
@@ -178,7 +178,7 @@ export default function TxPage() {
         { type: 'uint', value: '0' },    // min-shares
       ]);
     } else if (tpl === 'pool-remove-liquidity') {
-      const pool = CoreContracts.find(c => c.id.endsWith('.dex-dex-pool')) || CoreContracts[0];
+      const pool = CoreContracts.find(c => c.kind === 'dex') || CoreContracts[0];
       if (pool) setSelected(pool.id);
       const supported = pool ? await hasFunction(pool.id, 'remove-liquidity') : false;
       if (!supported) { setStatus('Template not supported: remove-liquidity'); setPresetRows(undefined); return; }
@@ -189,7 +189,7 @@ export default function TxPage() {
         { type: 'uint', value: '0' },   // min-dy
       ]);
     } else if (tpl === 'pool-swap-exact-in') {
-      const pool = CoreContracts.find(c => c.id.endsWith('.dex-dex-pool')) || CoreContracts[0];
+      const pool = CoreContracts.find(c => c.kind === 'dex') || CoreContracts[0];
       if (pool) setSelected(pool.id);
       // note: the pool has two versions; we use the simple signature swap-exact-in(amount-in,min-amount-out,x-to-y,deadline)
       const supported = pool ? await hasFunction(pool.id, 'swap-exact-in') : false;
@@ -202,7 +202,7 @@ export default function TxPage() {
         { type: 'uint', value: String(Date.now()) }, // deadline (placeholder)
       ]);
     } else if (tpl === 'pool-swap-exact-out') {
-      const pool = CoreContracts.find(c => c.id.endsWith('.dex-dex-pool')) || CoreContracts[0];
+      const pool = CoreContracts.find(c => c.kind === 'dex') || CoreContracts[0];
       if (pool) setSelected(pool.id);
       const supported = pool ? await hasFunction(pool.id, 'swap-exact-out') : false;
       if (!supported) { setStatus('Template not supported: swap-exact-out'); setPresetRows(undefined); return; }
