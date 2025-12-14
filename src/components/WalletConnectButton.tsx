@@ -32,10 +32,14 @@ export default function WalletConnectButton() {
   return (
     <button
       onClick={onClick}
-      className="text-sm px-3 py-1.5 rounded-md border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800"
-      aria-pressed={connected ? 'true' : 'false'}
+      className="text-sm px-4 py-2 rounded-md border border-gray-700 hover:bg-gray-800 transition-colors font-medium"
+      aria-pressed={connected ? "true" : "false"}
     >
-      {connected ? (address ? `Connected: ${address.slice(0,6)}...${address.slice(-4)}` : "Wallet Connected") : "Connect Wallet"}
+      {connected
+        ? address
+          ? `Disconnect`
+          : "Wallet Connected"
+        : "Connect Wallet"}
     </button>
   );
 }
