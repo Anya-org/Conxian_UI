@@ -10,10 +10,12 @@ describe('Contract Interactions', () => {
 
       // Check for critical contracts
       const factoryContract = CoreContracts.find(c => c.id.includes('dex-factory-v2'));
-      const oracleContract = CoreContracts.find(c => c.id.includes('oracle-aggregator'));
+      const oracleContract = CoreContracts.find(c => c.id.includes('oracle-aggregator-v2'));
+      const vaultContract = CoreContracts.find(c => c.id.includes('vault'));
 
       expect(factoryContract).toBeDefined();
       expect(oracleContract).toBeDefined();
+      expect(vaultContract).toBeDefined();
     });
 
     it('should have correct contract address format', () => {
@@ -97,7 +99,7 @@ describe('Contract Interactions', () => {
       expect(typeof ContractInteractions.getTokenBalance).toBe('function');
 
       // Verify that contract configuration exists for error handling
-      const oracleContract = CoreContracts.find(c => c.id.includes('oracle-aggregator'));
+      const oracleContract = CoreContracts.find(c => c.id.includes('oracle-aggregator-v2'));
       expect(oracleContract).toBeDefined();
     });
   });

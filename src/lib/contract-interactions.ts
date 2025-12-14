@@ -113,7 +113,7 @@ export class ContractInteractions {
 
 // Oracle functions
   static async getPrice(token: string): Promise<ContractCallResult> {
-    const oracleContract = CoreContracts.find((c) => c.id.includes('oracle-aggregator'));
+    const oracleContract = CoreContracts.find((c) => c.id.includes('oracle-aggregator-v2'));
     if (!oracleContract) {
       return { success: false, error: 'Oracle contract not found' };
     }

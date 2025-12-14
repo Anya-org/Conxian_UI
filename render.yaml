@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: conxian-ui
+    env: node
+    plan: free
+    buildCommand: "npm install && npm run build"
+    startCommand: "npm start"
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: NEXT_PUBLIC_CORE_API_URL
+        value: https://api.testnet.hiro.so
