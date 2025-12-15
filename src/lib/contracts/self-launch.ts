@@ -1,5 +1,5 @@
 // src/lib/contracts/self-launch.ts - Smart contract integration (simplified)
-import { STACKS_TESTNET, STACKS_MAINNET } from '@stacks/network';
+import { StacksNetwork, STACKS_TESTNET, STACKS_MAINNET } from '@stacks/network';
 
 export interface LaunchPhase {
   id: string;
@@ -27,7 +27,7 @@ export interface CommunityStats {
 }
 
 export class SelfLaunchContract {
-  private network: any;
+  private network: StacksNetwork;
   private contractAddress: string;
   private contractName: string;
 
@@ -104,20 +104,20 @@ export class SelfLaunchContract {
     };
   }
 
-  async contributeFunding(privateKey: string, amount: number) {
+  async contributeFunding(_privateKey: string, _amount: number) {
     // Mock transaction - in production would call actual contract
     return {
       txId: `0x${Math.random().toString(16).substr(2, 64)}`
     };
   }
 
-  async initializeCommunityPhaseRequirements(privateKey: string) {
+  async initializeCommunityPhaseRequirements(_privateKey: string) {
     return {
       txId: `0x${Math.random().toString(16).substr(2, 64)}`
     };
   }
 
-  async activateFundingCurve(privateKey: string) {
+  async activateFundingCurve(_privateKey: string) {
     return {
       txId: `0x${Math.random().toString(16).substr(2, 64)}`
     };

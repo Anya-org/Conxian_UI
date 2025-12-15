@@ -1,12 +1,12 @@
 // src/app/launch/page.tsx - Community Self-Launch Dashboard
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Progress } from '@/components/ui/Progress';
+import { Badge } from '@/components/ui/Badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 
 interface LaunchPhase {
   id: string;
@@ -27,11 +27,9 @@ interface Contribution {
 }
 
 export default function LaunchPage() {
-  const [currentPhase, setCurrentPhase] = useState('bootstrap');
   const [totalFunding, setTotalFunding] = useState(0);
-  const [userContribution, setUserContribution] = useState(0);
   const [contributions, setContributions] = useState<Contribution[]>([]);
-  const [isConnected, setIsConnected] = useState(false);
+  const [isConnected] = useState(false);
 
   // Mock data - in production, fetch from smart contracts
   const phases: LaunchPhase[] = [
@@ -69,7 +67,6 @@ export default function LaunchPage() {
     console.log(`Contributing ${amount} STX`);
 
     // Update UI state
-    setUserContribution(prev => prev + amount);
     setTotalFunding(prev => prev + amount);
 
     // Add to contributions list

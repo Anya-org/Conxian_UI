@@ -1,7 +1,6 @@
 // src/lib/hooks/use-self-launch.ts - React hook for launch system
-import { useState, useEffect, useCallback } from 'react';
-import { SelfLaunchContract, LaunchPhase, Contribution, CommunityStats } from '@/lib/contracts/self-launch';
-import { Account } from '@stacks/connect';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { SelfLaunchContract, LaunchPhase, CommunityStats } from '@/lib/contracts/self-launch';
 
 interface LaunchState {
   currentPhase: LaunchPhase | null;
@@ -29,7 +28,7 @@ export function useSelfLaunch(network: 'mainnet' | 'testnet' | 'devnet' = 'testn
     error: null
   });
 
-  const contract = new SelfLaunchContract(network);
+  const contract = useMemo(() => new SelfLaunchContract(network), [network]);
 
   const refreshData = useCallback(async () => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
@@ -70,7 +69,8 @@ export function useSelfLaunch(network: 'mainnet' | 'testnet' | 'devnet' = 'testn
   }, [contract]);
 
   const contribute = useCallback(async (
-    account: Account,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    account: any,
     amount: number
   ): Promise<{ success: boolean; txId?: string; error?: string }> => {
     try {

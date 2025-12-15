@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Tokens, CoreContracts } from "@/lib/contracts";
-import { callReadOnly, ReadOnlyResponse, getFungibleTokenBalances, FungibleTokenBalance } from "@/lib/coreApi";
+import { callReadOnly, getFungibleTokenBalances, FungibleTokenBalance } from "@/lib/coreApi";
 import { decodeResultHex, getUint } from "@/lib/clarity";
 import { standardPrincipalCV, uintCV, cvToHex } from "@stacks/transactions";
 import { openContractCall } from "@stacks/connect";
@@ -67,7 +67,6 @@ export default function SwapPage() {
   const [balances, setBalances] = React.useState<FungibleTokenBalance[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [sending, setSending] = React.useState(false);
-  const [result, setResult] = React.useState<ReadOnlyResponse | null>(null);
   const [status, setStatus] = React.useState<string>("");
   const [isSignedIn, setIsSignedIn] = React.useState(false);
 
@@ -76,7 +75,7 @@ export default function SwapPage() {
   const fromTokenBalance = balances.find(b => b.asset_identifier === fromToken);
   const isSameToken = fromToken === toToken;
 
-  const getEstimate = async () => {
+  const getEstimate = React.useCallback(async () => {
     if (!fromToken || !toToken || !debouncedFromAmount || isSameToken) return;
 
     const router = CoreContracts.find(c => c.id.endsWith('.multi-hop-router-v3'));
@@ -97,7 +96,6 @@ export default function SwapPage() {
     setLoading(true);
     try {
       const res = await callReadOnly(contractAddress, contractName, functionName, contractAddress, argsHex);
-      setResult(res);
       if (res.ok && res.result) {
         const decoded = decodeResultHex(res.result);
         if (decoded && decoded.ok) {
@@ -110,7 +108,7 @@ export default function SwapPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [fromToken, toToken, debouncedFromAmount, isSameToken]);
 
   const handleSwap = async () => {
     if (!fromToken || !toToken || !fromAmount || !toAmount || isSameToken) return;
@@ -190,17 +188,18 @@ export default function SwapPage() {
 
   React.useEffect(() => {
     getEstimate();
-  }, [fromToken, toToken, debouncedFromAmount]);
+  }, [getEstimate]);
 
   React.useEffect(() => {
-    if (userSession.isUserSignedIn()) {
+    const session = userSession.isUserSignedIn();
+    if (session) {
       setIsSignedIn(true);
       const { address } = userSession.loadUserData().profile.stxAddress;
       getFungibleTokenBalances(address).then(setBalances);
     } else {
       setIsSignedIn(false);
     }
-  }, [userSession.isUserSignedIn()]);
+  }, []);
 
   return (
     <div className="min-h-screen w-full p-6 sm:p-10 space-y-8">
