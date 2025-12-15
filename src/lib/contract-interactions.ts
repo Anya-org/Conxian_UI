@@ -8,7 +8,7 @@ import {
 import { StacksNetwork, STACKS_MAINNET, STACKS_TESTNET } from '@stacks/network';
 import { request } from '@stacks/connect';
 import { AppConfig } from './config';
-import { CoreContracts, Tokens } from './contracts';
+import { CoreContracts } from './contracts';
 
 // Network configuration
 const getNetwork = (): StacksNetwork => {
@@ -26,9 +26,9 @@ export type ContractCallResult = {
 
 // Helper to create contract call options
 const createCallOptions = (
-  contractId: string,
-  functionName: string,
-  functionArgs: ClarityValue[]
+  _contractId: string,
+  _functionName: string,
+  _functionArgs: ClarityValue[]
 ): Omit<
   ContractCallOptions,
   'contractAddress' | 'contractName' | 'functionName' | 'functionArgs'
