@@ -8,28 +8,71 @@ import { decodeResultHex, getTupleField, getUint } from "@/lib/clarity";
 
 const DEFAULT_SENDER = "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5";
 
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/Card";
+
 export default function PoolsPage() {
-  const dexPools = CoreContracts.filter(c => c.kind === 'dex');
-  const [selected, setSelected] = React.useState<string>(dexPools[0]?.id || "");
+  const dexPools = CoreContracts.filter((c) => c.kind === "dex");
+  const [selected, setSelected] = React.useState<string>(
+    dexPools[0]?.id || ""
+  );
   const [loading, setLoading] = React.useState(false);
 
   const [reserves, setReserves] = React.useState<ReadOnlyResponse | null>(null);
-  const [totalSupply, setTotalSupply] = React.useState<ReadOnlyResponse | null>(null);
+  const [totalSupply, setTotalSupply] =
+    React.useState<ReadOnlyResponse | null>(null);
   const [price, setPrice] = React.useState<ReadOnlyResponse | null>(null);
   const [feeInfo, setFeeInfo] = React.useState<ReadOnlyResponse | null>(null);
   const [perf, setPerf] = React.useState<ReadOnlyResponse | null>(null);
 
   const refresh = React.useCallback(async () => {
     if (!selected) return;
-    const [contractAddress, contractName] = selected.split('.') as [string, string];
+    const [contractAddress, contractName] = selected.split(".") as [
+      string,
+      string,
+    ];
     setLoading(true);
     try {
       const [r1, r2, r3, r4, r5] = await Promise.all([
-        callReadOnly(contractAddress, contractName, 'get-reserves', DEFAULT_SENDER, []),
-        callReadOnly(contractAddress, contractName, 'get-total-supply', DEFAULT_SENDER, []),
-        callReadOnly(contractAddress, contractName, 'get-price', DEFAULT_SENDER, []),
-        callReadOnly(contractAddress, contractName, 'get-fee-info', DEFAULT_SENDER, []),
-        callReadOnly(contractAddress, contractName, 'get-pool-performance', DEFAULT_SENDER, []),
+        callReadOnly(
+          contractAddress,
+          contractName,
+          "get-reserves",
+          DEFAULT_SENDER,
+          []
+        ),
+        callReadOnly(
+          contractAddress,
+          contractName,
+          "get-total-supply",
+          DEFAULT_SENDER,
+          []
+        ),
+        callReadOnly(
+          contractAddress,
+          contractName,
+          "get-price",
+          DEFAULT_SENDER,
+          []
+        ),
+        callReadOnly(
+          contractAddress,
+          contractName,
+          "get-fee-info",
+          DEFAULT_SENDER,
+          []
+        ),
+        callReadOnly(
+          contractAddress,
+          contractName,
+          "get-pool-performance",
+          DEFAULT_SENDER,
+          []
+        ),
       ]);
       setReserves(r1);
       setTotalSupply(r2);
@@ -41,58 +84,111 @@ export default function PoolsPage() {
     }
   }, [selected]);
 
-  React.useEffect(() => { refresh(); }, [refresh]);
+  React.useEffect(() => {
+    refresh();
+  }, [refresh]);
 
   return (
     <div className="min-h-screen w-full p-6 sm:p-10 space-y-8">
-      <header className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Pools</h1>
-        <div className="text-sm text-gray-600">Network: {AppConfig.network}</div>
+      <header className="flex items-center justify-between mb-10">
+        <h1 className="text-3xl font-bold text-neutral-light">Pools</h1>
+        <div className="text-sm text-neutral-medium">
+          Network: {AppConfig.network}
+        </div>
       </header>
 
-      <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-4 space-y-4">
-        <div className="grid gap-3 md:grid-cols-3">
-          <div>
-            <label className="text-xs block mb-1">Pool Contract</label>
-            <select aria-label="Pool contract" className="border rounded px-2 py-1 w-full" value={selected} onChange={e => setSelected(e.target.value)}>
-              {dexPools.map(c => (
-                <option key={c.id} value={c.id}>{c.label} — {c.id}</option>
-              ))}
-            </select>
+      <Card>
+        <CardHeader>
+          <CardTitle>Pool Explorer</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-3 md:grid-cols-3">
+            <div>
+              <label className="text-xs block mb-1">Pool Contract</label>
+              <select
+                aria-label="Pool contract"
+                className="border rounded px-2 py-1 w-full"
+                value={selected}
+                onChange={(e) => setSelected(e.target.value)}
+              >
+                {dexPools.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.label} — {c.id}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-end">
+              <button
+                onClick={refresh}
+                disabled={loading || !selected}
+                className="text-sm px-3 py-1.5 rounded-md border border-gray-300 dark:border-gray-600"
+              >
+                {loading ? "Refreshing..." : "Refresh"}
+              </button>
+            </div>
           </div>
-          <div className="flex items-end">
-            <button onClick={refresh} disabled={loading || !selected} className="text-sm px-3 py-1.5 rounded-md border border-gray-300 dark:border-gray-600">
-              {loading ? 'Refreshing...' : 'Refresh'}
-            </button>
-          </div>
-        </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
-          <div className="rounded border border-gray-200 dark:border-gray-700 p-3">
-            <div className="font-medium mb-1">Reserves</div>
-            <pre className="text-xs overflow-auto">{reserves ? JSON.stringify(reserves, null, 2) : '—'}</pre>
+          <div className="grid gap-4 md:grid-cols-3">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Reserves</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <pre className="text-xs overflow-auto">
+                  {reserves ? JSON.stringify(reserves, null, 2) : "—"}
+                </pre>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Total Supply</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <pre className="text-xs overflow-auto">
+                  {totalSupply ? JSON.stringify(totalSupply, null, 2) : "—"}
+                </pre>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Price</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <pre className="text-xs overflow-auto">
+                  {price ? JSON.stringify(price, null, 2) : "—"}
+                </pre>
+              </CardContent>
+            </Card>
           </div>
-          <div className="rounded border border-gray-200 dark:border-gray-700 p-3">
-            <div className="font-medium mb-1">Total Supply</div>
-            <pre className="text-xs overflow-auto">{totalSupply ? JSON.stringify(totalSupply, null, 2) : '—'}</pre>
-          </div>
-          <div className="rounded border border-gray-200 dark:border-gray-700 p-3">
-            <div className="font-medium mb-1">Price</div>
-            <pre className="text-xs overflow-auto">{price ? JSON.stringify(price, null, 2) : '—'}</pre>
-          </div>
-        </div>
 
-        <div className="grid gap-4 md:grid-cols-3 mt-4">
-          <div className="rounded border border-gray-200 dark:border-gray-700 p-3">
-            <div className="font-medium mb-1">Fee Info</div>
-            <pre className="text-xs overflow-auto">{feeInfo ? JSON.stringify(feeInfo, null, 2) : '—'}</pre>
+          <div className="grid gap-4 md:grid-cols-3 mt-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Fee Info</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <pre className="text-xs overflow-auto">
+                  {feeInfo ? JSON.stringify(feeInfo, null, 2) : "—"}
+                </pre>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Derived KPIs</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <DerivedKPIs
+                  reserves={reserves}
+                  price={price}
+                  feeInfo={feeInfo}
+                  perf={perf}
+                />
+              </CardContent>
+            </Card>
           </div>
-          <div className="rounded border border-gray-200 dark:border-gray-700 p-3">
-            <div className="font-medium mb-1">Derived KPIs</div>
-            <DerivedKPIs reserves={reserves} price={price} feeInfo={feeInfo} perf={perf} />
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

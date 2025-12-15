@@ -19,11 +19,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         <link rel="icon" href="/logo.jpg" />
       </head>
-      <body className={`${inter.variable} antialiased`}>
+      <body
+        className={`${inter.variable} antialiased bg-neutral-dark text-neutral-light`}
+      >
         <Navbar />
         {children}
       </body>

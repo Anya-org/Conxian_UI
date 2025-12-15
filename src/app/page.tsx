@@ -1,3 +1,10 @@
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/Card";
 import EnvStatus from "@/components/EnvStatus";
 import WalletConnectButton from "@/components/WalletConnectButton";
 
@@ -59,79 +66,111 @@ const TrendingUpIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 export default function Home() {
   return (
-    <div className="min-h-screen w-full bg-gray-950 text-white p-6 sm:p-10">
-      <header className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-semibold">Conxian Unified Dashboard</h1>
+    <div className="min-h-screen w-full p-6 sm:p-10">
+      <header className="flex items-center justify-between mb-10">
+        <h1 className="text-3xl font-bold text-neutral-light">Dashboard</h1>
         <WalletConnectButton />
       </header>
 
-      <section className="mb-8">
-        <EnvStatus />
-      </section>
+      <main className="space-y-10">
+        <section>
+          <EnvStatus />
+        </section>
 
-      <section className="grid gap-6 md:grid-cols-3 mb-8">
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-medium text-gray-400">TVL</h3>
-            <DollarSignIcon className="h-6 w-6 text-gray-500" />
-          </div>
-          <div className="text-3xl font-bold">$0</div>
-          <div className="text-sm text-gray-500">Across Conxian protocols</div>
-        </div>
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-medium text-gray-400">Active Vaults</h3>
-            <ShieldCheckIcon className="h-6 w-6 text-gray-500" />
-          </div>
-          <div className="text-3xl font-bold">0</div>
-          <div className="text-sm text-gray-500">Configured & healthy</div>
-        </div>
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-medium text-gray-400">APY (Median)</h3>
-            <TrendingUpIcon className="h-6 w-6 text-gray-500" />
-          </div>
-          <div className="text-3xl font-bold">0%</div>
-          <div className="text-sm text-gray-500">Benchmarks pending</div>
-        </div>
-      </section>
+        <section className="grid gap-6 md:grid-cols-3">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-neutral-light">
+                TVL
+              </CardTitle>
+              <DollarSignIcon className="w-4 h-4 text-neutral-medium" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">$0</div>
+              <p className="text-xs text-neutral-medium">
+                Across Conxian protocols
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-neutral-light">
+                Active Vaults
+              </CardTitle>
+              <ShieldCheckIcon className="w-4 h-4 text-neutral-medium" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">0</div>
+              <p className="text-xs text-neutral-medium">
+                Configured & healthy
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-neutral-light">
+                APY (Median)
+              </CardTitle>
+              <TrendingUpIcon className="w-4 h-4 text-neutral-medium" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">0%</div>
+              <p className="text-xs text-neutral-medium">Benchmarks pending</p>
+            </CardContent>
+          </Card>
+        </section>
 
-      <section className="grid gap-6 md:grid-cols-2">
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
-          <h2 className="text-lg font-semibold mb-4">Vaults</h2>
-          <div className="grid grid-cols-3 gap-4 text-sm text-gray-400 font-medium">
-            <div>Name</div>
-            <div>Asset</div>
-            <div className="text-right">APY</div>
-          </div>
-          <div className="mt-4 text-sm text-gray-500">
-            No vaults available yet.
-          </div>
-        </div>
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
-          <h2 className="text-lg font-semibold mb-4">Staking</h2>
-          <div className="grid grid-cols-2 gap-6">
-            <div className="rounded-lg bg-gray-800 p-4">
-              <div className="text-sm text-gray-400 mb-2">Total Staked</div>
-              <div className="text-xl font-bold">$0</div>
-            </div>
-            <div className="rounded-lg bg-gray-800 p-4">
-              <div className="text-sm text-gray-400 mb-2">My Staked</div>
-              <div className="text-xl font-bold">$0</div>
-            </div>
-          </div>
-        </div>
-      </section>
+        <section className="grid gap-6 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Vaults</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-3 gap-4 text-sm text-neutral-medium font-medium">
+                <div>Name</div>
+                <div>Asset</div>
+                <div className="text-right">APY</div>
+              </div>
+              <div className="mt-4 text-sm text-neutral-medium">
+                No vaults available yet.
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Staking</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-6">
+              <div className="rounded-lg bg-neutral-dark p-4">
+                <div className="text-sm text-neutral-medium mb-2">
+                  Total Staked
+                </div>
+                <div className="text-xl font-bold">$0</div>
+              </div>
+              <div className="rounded-lg bg-neutral-dark p-4">
+                <div className="text-sm text-neutral-medium mb-2">
+                  My Staked
+                </div>
+                <div className="text-xl font-bold">$0</div>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
 
-      <section className="mt-8">
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
-          <h2 className="text-lg font-semibold mb-4">Benchmarks</h2>
-          <div className="text-sm text-gray-400">
-            Compare against top DeFi, CeFi, banks, and enterprise finance. KPIs:
-            APY, spread, slippage, uptime, latency.
-          </div>
-        </div>
-      </section>
+        <section>
+          <Card>
+            <CardHeader>
+              <CardTitle>Benchmarks</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-neutral-medium">
+                Compare against top DeFi, CeFi, banks, and enterprise finance.
+                KPIs: APY, spread, slippage, uptime, latency.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+      </main>
     </div>
   );
 }
