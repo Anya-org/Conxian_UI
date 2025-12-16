@@ -13,6 +13,8 @@
     "prepare": "node scripts/prepare.cjs"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
+    "@playwright/test": "^1.57.0",
     "@radix-ui/react-tabs": "^1.1.13",
     "@stacks/auth": "7.2.0",
     "@stacks/connect": "8.1.9",
