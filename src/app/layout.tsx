@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
+import ThemeManager from "@/components/ThemeManager";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -27,6 +28,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} font-sans h-full antialiased text-gray-300`}
       >
+        <ThemeManager />
         <div>
           <Sidebar />
           <div className="lg:pl-64">
