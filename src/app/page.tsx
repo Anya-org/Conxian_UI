@@ -1,4 +1,3 @@
-
 import {
   Card,
   CardContent,
@@ -11,8 +10,6 @@ import {
   ShieldCheckIcon,
   ArrowTrendingUpIcon,
 } from "@heroicons/react/24/outline";
-
-export const dynamic = "force-dynamic";
 
 export default function Home() {
   return (
@@ -54,7 +51,9 @@ export default function Home() {
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">APY (Median)</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                APY (Median)
+              </CardTitle>
               <ArrowTrendingUpIcon className="w-5 h-5 text-gray-400" />
             </CardHeader>
             <CardContent>
