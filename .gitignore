@@ -44,3 +44,4 @@ next-env.d.ts
 
 # generated contract manifests
 /src/lib/generated/
+test-results/

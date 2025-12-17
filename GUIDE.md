@@ -10,17 +10,17 @@ Our retail mode is designed for a simple and intuitive user experience. Here's h
 
 Start by connecting your Stacks wallet. Click the "Connect Wallet" button in the top-right corner and approve the connection in your wallet extension.
 
+![Connect Wallet](docs/images/guide_01_connect_wallet.png)
+
 ### Step 2: Navigate to the Swap Page
 
 Once your wallet is connected, click on the "Swap" link in the main navigation bar to access our user-friendly swapping interface.
 
-### Step 3: Fill Out the Swap Form
+![Swap Page](docs/images/guide_02_swap_page.png)
 
-Choose the tokens you'd like to swap, enter the amount, and let our app do the rest. The "To" amount will be estimated for you, so you know exactly what you're getting.
+### Step 3: Fill Out the Swap Form & Initiate the Swap
 
-### Step 4: Initiate the Swap
-
-Happy with the estimate? Click the "Swap" button, approve the transaction in your wallet, and you're good to go!
+Choose the tokens you'd like to swap, enter the amount, and click the "Swap" button. Approve the transaction in your wallet, and you're good to go!
 
 ## For Our PRO Users: Unleash the Power of Conxian
 
