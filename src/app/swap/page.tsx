@@ -2,7 +2,11 @@
 
 import React from "react";
 import { Tokens, CoreContracts } from "@/lib/contracts";
-import { callReadOnly, getFungibleTokenBalances, FungibleTokenBalance } from "@/lib/coreApi";
+import {
+  callReadOnly,
+  getFungibleTokenBalances,
+  FungibleTokenBalance,
+} from "@/lib/coreApi";
 import { decodeResultHex, getUint } from "@/lib/clarity";
 import { standardPrincipalCV, uintCV, cvToHex } from "@stacks/transactions";
 import { openContractCall } from "@stacks/connect";
@@ -10,12 +14,15 @@ import { userSession, connectWallet } from "@/lib/wallet";
 import { AppConfig } from "@/lib/config";
 import { createNetwork } from "@stacks/network";
 import type { StacksNetwork } from "@stacks/network";
-import WalletConnectButton from "@/components/WalletConnectButton";
+import ConnectWallet from "@/components/ConnectWallet";
 
 function getNetwork(): StacksNetwork {
-  const name = (AppConfig.network as 'mainnet' | 'testnet' | 'devnet');
-  if (name === 'devnet') {
-    return createNetwork({ network: 'devnet', client: { baseUrl: AppConfig.coreApiUrl } });
+  const name = AppConfig.network as "mainnet" | "testnet" | "devnet";
+  if (name === "devnet") {
+    return createNetwork({
+      network: "devnet",
+      client: { baseUrl: AppConfig.coreApiUrl },
+    });
   }
   return createNetwork(name);
 }
@@ -36,7 +43,9 @@ function parseAmount(amount: string, decimals = 6): string {
   if (!amount) return "0";
   try {
     const [integerPart, fractionalPart = ""] = amount.split(".");
-    const paddedFractional = fractionalPart.substring(0, decimals).padEnd(decimals, "0");
+    const paddedFractional = fractionalPart
+      .substring(0, decimals)
+      .padEnd(decimals, "0");
     return BigInt(integerPart + paddedFractional).toString();
   } catch {
     return "0";
@@ -55,7 +64,6 @@ function useDebounce<T>(value: T, delay: number): T {
   }, [value, delay]);
   return debouncedValue;
 }
-
 
 import {
   Card,
@@ -171,12 +179,7 @@ export default function SwapPage() {
       (BigInt(toAmount) * BigInt(Math.floor(slippage * 100))) / BigInt(10000);
     const minToAmountCV = uintCV(minToAmount);
 
-    const functionArgs = [
-      fromTokenCV,
-      toTokenCV,
-      fromAmountCV,
-      minToAmountCV,
-    ];
+    const functionArgs = [fromTokenCV, toTokenCV, fromAmountCV, minToAmountCV];
 
     setSending(true);
     setStatus("");
@@ -248,7 +251,9 @@ export default function SwapPage() {
     <div className="min-h-screen w-full p-6 sm:p-10 space-y-8">
       <header className="flex items-center justify-between mb-10">
         <h1 className="text-3xl font-bold text-neutral-light">Swap</h1>
-        <WalletConnectButton />
+        <div className="lg:hidden">
+          <ConnectWallet />
+        </div>
       </header>
       <Tabs defaultValue="simple" className="w-full max-w-md mx-auto">
         <TabsList className="grid w-full grid-cols-2">
@@ -278,7 +283,7 @@ export default function SwapPage() {
                   <div className="flex gap-2">
                     <select
                       aria-label="From token"
-                      className="border rounded px-2 py-1 w-full"
+                      className="border rounded px-2 py-1 w-full text-black"
                       value={fromToken}
                       onChange={handleFromTokenChange}
                     >
@@ -290,7 +295,7 @@ export default function SwapPage() {
                     </select>
                     <input
                       aria-label="From amount"
-                      className="border rounded px-2 py-1 w-full"
+                      className="border rounded px-2 py-1 w-full text-black"
                       value={formatAmount(fromAmount, fromTokenInfo?.decimals)}
                       onChange={handleFromAmountChange}
                     />
@@ -330,7 +335,7 @@ export default function SwapPage() {
                   <div className="flex gap-2">
                     <select
                       aria-label="To token"
-                      className="border rounded px-2 py-1 w-full"
+                      className="border rounded px-2 py-1 w-full text-black"
                       value={toToken}
                       onChange={handleToTokenChange}
                     >
@@ -342,7 +347,7 @@ export default function SwapPage() {
                     </select>
                     <input
                       aria-label="To amount"
-                      className="border rounded px-2 py-1 w-full"
+                      className="border rounded px-2 py-1 w-full text-black"
                       value={formatAmount(toAmount, toTokenInfo?.decimals)}
                       readOnly
                     />
@@ -357,7 +362,7 @@ export default function SwapPage() {
                     type="number"
                     value={slippage}
                     onChange={(e) => setSlippage(parseFloat(e.target.value))}
-                    className="border rounded px-2 py-1 w-20 text-right"
+                    className="border rounded px-2 py-1 w-20 text-right text-black"
                   />
                   <span>%</span>
                 </div>
@@ -417,9 +422,25 @@ export default function SwapPage() {
 
 function Spinner() {
   return (
-    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    <svg
+      className="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      ></circle>
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+      ></path>
     </svg>
   );
 }

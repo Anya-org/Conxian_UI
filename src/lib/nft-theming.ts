@@ -1,4 +1,3 @@
-
 import { userSession } from "@/lib/wallet";
 import { STACKS_MAINNET } from "@stacks/network";
 import { fetchCallReadOnlyFunction } from "@stacks/transactions";
@@ -30,6 +29,7 @@ export async function hasBitcoinMonkeyNft(): Promise<boolean> {
 
     // Check if the user's address is in the list of owners
     // This is a simplified example. The actual logic will depend on the contract's response.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return result && (result as any).value.some((owner: any) => owner.value === userAddress);
   } catch (error) {
     console.error("Error checking for Bitcoin Monkey NFT:", error);
