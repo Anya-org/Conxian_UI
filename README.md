@@ -1,19 +1,32 @@
-## Conxian UI
+# Welcome to the Conxian UI!
 
 ![Conxian UI Homepage](docs/images/homepage.png)
 
-Next.js app for interacting with Conxian contracts on Stacks. Includes dynamic contract routing, transaction templates, and a Pools dashboard with KPIs.
+This is the official UI for interacting with Conxian contracts on the Stacks blockchain. Whether you're a casual user or a seasoned pro, we've got you covered.
+
+## Two Modes, One Seamless Experience
+
+We offer two distinct modes to cater to your needs:
+
+*   **Retail Mode**: A simple and intuitive interface for everyday users.
+*   **PRO Mode**: A dark-themed, power-packed interface for our more advanced users.
+
+## Our Signature Look: The Conxian Color Palette
+
+Our "earthy corporate finance" theme is designed to be both professional and inviting:
+
+*   **Primary**: #2E403B (a deep, calming green)
+*   **Accent**: #D4A017 (a touch of sophisticated gold)
+*   **Neutrals**: #F5F5F5, #E0E0E0, #333333 (for a clean, modern look)
+
+## Getting Started
+
+Ready to dive in? Here's how to get up and running:
 
 ### Requirements
 
-- Node.js 20+
-- A Core API URL (Hiro): mainnet/testnet/devnet
-
-### Environment
-
-- `NEXT_PUBLIC_CORE_API_URL` (browser + server)
-  - Defaults to `https://api.testnet.hiro.so`
-  - Network is inferred from the URL: `devnet` if localhost, `testnet` if contains `testnet`, else `mainnet`.
+*   Node.js 20+
+*   A Core API URL (Hiro): mainnet/testnet/devnet
 
 ### Installation
 
@@ -21,102 +34,41 @@ Next.js app for interacting with Conxian contracts on Stacks. Includes dynamic c
 npm install
 ```
 
-After installation, a `prepare` script will automatically create a `src/lib/generated/base.json` file with a default principal. This file is required for the application to build.
-
 ### Run (Dev)
 
 ```bash
 NEXT_PUBLIC_CORE_API_URL=https://api.testnet.hiro.so npm run dev
-# App will start at http://localhost:3000 (or next available port)
 ```
 
-### Build & Start (Prod)
+## Our Backend: The Power of the Stacks Blockchain
 
-```bash
-npm run build
-npm start
-```
+This frontend is powered by the Conxian DeFi protocol backend contracts. For a full list of our contracts, check out our `ARCHITECTURE.md` file.
 
-### Backend Alignment
+## Our Contract Interaction System: A Seamless Experience
 
-This frontend is aligned with the Conxian DeFi protocol backend contracts. Key contracts include:
+Our contract interaction system (`src/lib/contract-interactions.ts`) is designed to be:
 
-#### Core Contracts
-- **DEX Factory V2** (`dex-factory-v2`): Factory for creating liquidity pools
-- **DEX Router** (`dex-router`): Multi-hop routing for token swaps
-- **Oracle Aggregator** (`oracle-aggregator`): Price feed aggregation
-- **Vault** (`vault`): Main liquidity vault
-- **Circuit Breaker** (`circuit-breaker`): Emergency pause mechanism
-- **Bond Factory** (`bond-factory`): Bond issuance system
+*   **User-Friendly**: With read-only and public function calls, you can query contract state and execute transactions with ease.
+*   **Type-Safe**: Our TypeScript interfaces ensure that all contract interactions are safe and secure.
+*   **Robust**: With comprehensive error handling, you can be sure that your transactions will be handled with care.
 
-#### Tokens
-- **CXD Token** (`cxd-token`): Protocol governance token
-- **CXVG Token** (`cxvg-token`): Vault governance token
-- **CXTR Token** (`cxtr-token`): Treasury token
-- **CXS Token** (`cxs-token`): Staking token
-- **CXLP Token** (`cxlp-token`): Liquidity provider token
+## Testing: Our Commitment to Quality
 
-#### Monitoring & Security
-- **Analytics Aggregator** (`analytics-aggregator`): Protocol analytics
-- **Performance Optimizer** (`performance-optimizer`): Performance monitoring
-- **Finance Metrics** (`finance-metrics`): Financial KPIs
-- **Audit Registry** (`audit-registry`): Security audit tracking
-- **MEV Protector** (`mev-protector`): MEV protection
+We're committed to providing a high-quality experience. That's why we've implemented a comprehensive test suite that covers:
 
-### Contract Interaction System
+*   Contract function calls
+*   Error handling scenarios
+*   Configuration validation
+*   Integration with the Stacks network
 
-The application includes a comprehensive contract interaction system (`src/lib/contract-interactions.ts`) that provides:
+## Development: A Look Under the Hood
 
-- **Read-only function calls**: Query contract state without transactions
-- **Public function calls**: Execute transactions through user wallets
-- **Type-safe interfaces**: Proper TypeScript types for all contract interactions
-- **Error handling**: Comprehensive error handling for network and contract issues
+Our development environment is designed to be as user-friendly as our app. With features like our Clarity Argument Builder and dynamic ABI fetching, you can build and test with ease.
 
-### Testing
+## Smoke Tests: A Quick Sanity Check
 
-Run the test suite to verify contract interactions:
+Want to make sure everything is running smoothly? Our smoke tests are a quick and easy way to check the health of our app.
 
-```bash
-npm test        # Interactive test runner
-npm run test:run # Run tests once
-npm run test:ui  # Visual test interface
-```
+## We're Here to Help
 
-Tests cover:
-- Contract function calls
-- Error handling scenarios
-- Configuration validation
-- Integration with Stacks network
-
-### Development
-
-- Clarity Argument Builder
-  - Per-row Optional toggle: wrap values as `some(...)` or `none`
-  - Supports base types: `uint`, `int`, `bool`, `principal`, `ascii`, `utf8`, `buffer-hex`
-- Transactions (/tx)
-  - Templates (ABI-checked):
-    - SIP-010: `transfer`, `approve`, `transfer-from`
-    - Pools: `add-liquidity`, `remove-liquidity`, `swap-exact-in`, `swap-exact-out`
-  - Wallet call via `@stacks/connect`
-- Router (/router)
-  - ABI fetched dynamically; function dropdown populated from contract ABI
-  - Preset inputs maintained for quick estimate flows
-- Pools (/pools)
-  - Read-only calls: `get-reserves`, `get-total-supply`, `get-price`, `get-fee-info`, `get-pool-performance`
-  - Derived KPIs: LP/Protocol/Total fees (bps), Price X/Y, Price Y/X, Inventory Skew, 24h Volume, 24h Fees, TVL (A units)
-
-### Smoke Tests
-
-- Wallet connect button in navbar
-- Transactions
-  - Open `/tx`, pick a template, confirm function + args populated, click Open Wallet
-- Router
-  - Open `/router`, confirm function list is populated from ABI, run an estimate
-- Pools
-  - Open `/pools`, select a pool, click refresh; verify KPIs render
-
-### Notes
-
-- Contract ABIs are retrieved on demand from the configured Core API via `GET /v2/contracts/interface/{principal}/{name}`.
-- Read-only calls are sent via `POST /v2/contracts/call-read/...` with hex-encoded Clarity args.
-- If a template function is not present in the selected contract ABI, the UI will show a "Template not supported" status.
+Whether you're a retail user, a pro, or a developer, we're here to help you make the most of the Conxian UI. If you have any questions, don't hesitate to reach out to our team. Happy swapping!

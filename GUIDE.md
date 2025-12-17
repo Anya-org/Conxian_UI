@@ -1,42 +1,61 @@
-# Conxian UI User Guide
+# Welcome to the Conxian UI!
 
-Welcome to the Conxian UI! This guide will walk you through the primary user journey: performing a token swap.
+This guide is your one-stop shop for mastering the Conxian UI. Whether you're a casual user or a seasoned pro, we've got you covered.
 
-## Step 1: Connect Your Wallet
+## For Our Retail Users: A Seamless Swapping Experience
 
-To get started, you'll need to connect your Stacks wallet.
+Our retail mode is designed for a simple and intuitive user experience. Here's how to perform a token swap:
 
-1.  Click the **Connect Wallet** button in the top-right corner of the application.
-2.  A pop-up will appear from your wallet extension, asking you to approve the connection.
+### Step 1: Connect Your Wallet
 
-![Connect Wallet](docs/images/guide_01_connect_wallet.png)
+Start by connecting your Stacks wallet. Click the "Connect Wallet" button in the top-right corner and approve the connection in your wallet extension.
 
-## Step 2: Navigate to the Swap Page
+### Step 2: Navigate to the Swap Page
 
-Once your wallet is connected, head over to the swap page to begin.
+Once your wallet is connected, click on the "Swap" link in the main navigation bar to access our user-friendly swapping interface.
 
-1.  Click on the **Swap** link in the main navigation bar.
-2.  This will take you to the main swapping interface.
+### Step 3: Fill Out the Swap Form
 
-![Swap Page](docs/images/guide_02_swap_page.png)
+Choose the tokens you'd like to swap, enter the amount, and let our app do the rest. The "To" amount will be estimated for you, so you know exactly what you're getting.
 
-## Step 3: Fill Out the Swap Form
+### Step 4: Initiate the Swap
 
-Now it's time to choose which tokens you'd like to swap.
+Happy with the estimate? Click the "Swap" button, approve the transaction in your wallet, and you're good to go!
 
-1.  **From**: Use the top dropdown to select the token you want to swap *from*.
-2.  **To**: Use the bottom dropdown to select the token you want to receive.
-3.  **Amount**: Enter the amount of the "From" token you wish to swap. The "To" amount will be estimated for you.
+## For Our PRO Users: Unleash the Power of Conxian
 
-![Swap Form Filled](docs/images/guide_03_swap_form_filled.png)
+Our PRO mode is designed for power users who want to take full advantage of the Conxian ecosystem. With a sleek, dark-themed interface and advanced features, you'll feel right at home.
 
-## Step 4: Initiate the Swap
+### The PRO Experience:
 
-Once you've filled out the form and are happy with the estimated amount, you can initiate the swap.
+*   **A Professional Look and Feel**: Our PRO mode features a dark-themed navbar and a "PRO" label next to the logo, so you know you're in the right place.
+*   **Advanced Features**: Access to advanced features and a more detailed view of the Conxian ecosystem.
+*   **A Seamless Transition**: Switch between retail and PRO modes with ease, so you can choose the experience that's right for you.
 
-1.  Click the **Swap** button at the bottom of the form (Note: if your wallet is not connected, this button will still say "Connect Wallet").
-2.  Your wallet will pop up again, asking you to confirm the transaction details. Review them carefully and approve the transaction.
+## For Our Developers: A Quick Start Guide
 
-![Swap Initiated](docs/images/guide_04_swap_initiated.png)
+Ready to dive in and start building? Here's how to get up and running in no time:
 
-After you confirm, the transaction will be sent to the Stacks network. You can monitor its progress in your wallet or on a Stacks block explorer.
+### Step 1: Clone the Repo
+
+```bash
+git clone https://github.com/Conxian/Conxian-UI.git
+```
+
+### Step 2: Install Dependencies
+
+```bash
+npm install
+```
+
+### Step 3: Run the Dev Server
+
+```bash
+NEXT_PUBLIC_CORE_API_URL=https://api.testnet.hiro.so npm run dev
+```
+
+And that's it! You're ready to start building.
+
+## We're Here to Help
+
+Whether you're a retail user, a pro, or a developer, we're here to help you make the most of the Conxian UI. If you have any questions, don't hesitate to reach out to our team. Happy swapping!
