@@ -10,6 +10,8 @@ import {
   ShieldCheckIcon,
   ArrowTrendingUpIcon,
 } from "@heroicons/react/24/outline";
+import { StatCard } from "@/components/ui/StatCard";
+import { VStack } from "@/components/ui/VStack";
 
 export default function Home() {
   return (
@@ -21,46 +23,30 @@ export default function Home() {
         </p>
       </div>
 
-      <div className="mt-8 space-y-10">
+      <VStack className="mt-8">
         <section>
           <EnvStatus />
         </section>
 
         <section className="grid gap-6 md:grid-cols-3">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">TVL</CardTitle>
-              <CurrencyDollarIcon className="w-5 h-5 text-gray-400" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">$0</div>
-              <p className="text-xs text-gray-500">Across Conxian protocols</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">
-                Active Vaults
-              </CardTitle>
-              <ShieldCheckIcon className="w-5 h-5 text-gray-400" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">0</div>
-              <p className="text-xs text-gray-500">Configured & healthy</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">
-                APY (Median)
-              </CardTitle>
-              <ArrowTrendingUpIcon className="w-5 h-5 text-gray-400" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">0%</div>
-              <p className="text-xs text-gray-500">Benchmarks pending</p>
-            </CardContent>
-          </Card>
+          <StatCard
+            title="TVL"
+            value="$0"
+            icon={<CurrencyDollarIcon className="w-5 h-5 text-gray-400" />}
+            subtext="Across Conxian protocols"
+          />
+          <StatCard
+            title="Active Vaults"
+            value="0"
+            icon={<ShieldCheckIcon className="w-5 h-5 text-gray-400" />}
+            subtext="Configured & healthy"
+          />
+          <StatCard
+            title="APY (Median)"
+            value="0%"
+            icon={<ArrowTrendingUpIcon className="w-5 h-5 text-gray-400" />}
+            subtext="Benchmarks pending"
+          />
         </section>
 
         <section className="grid gap-6 md:grid-cols-2">
@@ -109,7 +95,7 @@ export default function Home() {
             </CardContent>
           </Card>
         </section>
-      </div>
+      </VStack>
     </>
   );
 }

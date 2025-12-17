@@ -20,6 +20,8 @@ Once your wallet is connected, you can navigate through the sidebar to access di
 #### Dashboard (Home)
 The default landing page provides an overview of the Conxian ecosystem.
 
+![Homepage](docs/images/homepage.png)
+
 #### Add Liquidity
 Access the "Add Liquidity" page to contribute tokens to liquidity pools, enabling seamless swaps and earning rewards.
 *(New image needed for Add Liquidity page)*

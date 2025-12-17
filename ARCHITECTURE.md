@@ -18,7 +18,16 @@ The "backend" of our application is the suite of Conxian smart contracts on the 
 *   **`src/lib/coreApi.ts`**: This is our low-level communication toolkit. It handles the nitty-gritty of making API calls to the Stacks blockchain, such as fetching balances or making read-only contract calls.
 *   **`src/lib/contract-interactions.ts`**: This is where the magic happens. We use the `@stacks/transactions` and `@stacks/connect` libraries to build and send transactions, making it easy to interact with our smart contracts.
 
-## 4. The User's Journey: A Data Flow Story
+## 4. The User Interface
+
+The Conxian UI is built with Next.js and Tailwind CSS. We also use a set of reusable UI components to ensure a consistent look and feel throughout the application.
+
+### Our UI Toolkit:
+
+*   **`src/components/ui/VStack.tsx`**: A reusable component for vertical stacking of elements.
+*   **`src/components/ui/StatCard.tsx`**: A reusable component for displaying statistics in a card format.
+
+## 5. The User's Journey: A Data Flow Story
 
 Here's a step-by-step look at how data flows through our app:
 
@@ -29,10 +38,10 @@ Here's a step-by-step look at how data flows through our app:
     *   For transactions (like making a swap), we use `request` from `@stacks/connect` to open a wallet pop-up, allowing the user to approve the transaction securely.
 4.  **A Fresh Look**: The UI updates to reflect the results of the blockchain interaction, providing a seamless user experience.
 
-## 5. Staying Ahead of the Curve: Our Tech Stack
+## 6. Staying Ahead of the Curve: Our Tech Stack
 
 We're committed to using the latest and greatest technologies to ensure a stable and secure platform. That's why we've updated our codebase to use the `request` method from `@stacks/connect`, replacing the deprecated `openContractCall`. This ensures we're aligned with the latest standards and best practices.
 
-## 6. Our Promise: A Seamless User Experience
+## 7. Our Promise: A Seamless User Experience
 
 By combining a modern frontend with the power of the Stacks blockchain, we're able to provide a user-friendly and decentralized platform for interacting with the Conxian ecosystem. We're excited to have you on board!

@@ -52,6 +52,13 @@ Our contract interaction system (`src/lib/contract-interactions.ts`) is designed
 *   **Type-Safe**: Our TypeScript interfaces ensure that all contract interactions are safe and secure.
 *   **Robust**: With comprehensive error handling, you can be sure that your transactions will be handled with care.
 
+## UI Components
+
+We use a set of reusable UI components to ensure a consistent look and feel throughout the application.
+
+*   **`src/components/ui/VStack.tsx`**: A reusable component for vertical stacking of elements.
+*   **`src/components/ui/StatCard.tsx`**: A reusable component for displaying statistics in a card format.
+
 ## Testing: Our Commitment to Quality
 
 We're committed to providing a high-quality experience. That's why we've implemented a comprehensive test suite that covers:
