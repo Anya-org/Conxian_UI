@@ -1,26 +1,45 @@
+md
 # Welcome to the Conxian UI!
 
 This guide is your one-stop shop for mastering the Conxian UI. Whether you're a casual user or a seasoned pro, we've got you covered.
 
-## For Our Retail Users: A Seamless Swapping Experience
+## For Our Users: Navigating the Conxian Ecosystem
 
-Our retail mode is designed for a simple and intuitive user experience. Here's how to perform a token swap:
+Our UI is designed for a simple and intuitive user experience, providing access to various DeFi functionalities.
 
 ### Step 1: Connect Your Wallet
 
-Start by connecting your Stacks wallet. Click the "Connect Wallet" button in the top-right corner and approve the connection in your wallet extension.
+Start by connecting your Stacks wallet. Click the "Connect Wallet" button in the top-right corner and approve the connection in your wallet extension. You'll receive a **toast notification** confirming your connection status.
 
 ![Connect Wallet](docs/images/guide_01_connect_wallet.png)
 
-### Step 2: Navigate to the Swap Page
+### Step 2: Explore Conxian's Features
 
-Once your wallet is connected, click on the "Swap" link in the main navigation bar to access our user-friendly swapping interface.
+Once your wallet is connected, you can navigate through the sidebar to access different features of the Conxian ecosystem.
+
+#### Dashboard (Home)
+The default landing page provides an overview of the Conxian ecosystem.
+
+#### Add Liquidity
+Access the "Add Liquidity" page to contribute tokens to liquidity pools, enabling seamless swaps and earning rewards.
+*(New image needed for Add Liquidity page)*
+
+#### My Positions
+Visit "My Positions" to view and manage your current liquidity positions. Here, you can see your share in various pools and remove liquidity when desired.
+*(New image needed for My Positions page)*
+
+#### Shielded Wallets
+Explore "Shielded Wallets" for enhanced privacy. Create new shielded wallets, manage existing ones, and perform private transactions (send/receive funds).
+*(New image needed for Shielded Wallets page)*
+
+#### Swap
+Click on the "Swap" link to access our user-friendly interface for exchanging one token for another.
 
 ![Swap Page](docs/images/guide_02_swap_page.png)
 
-### Step 3: Fill Out the Swap Form & Initiate the Swap
+#### Transaction Feedback
 
-Choose the tokens you'd like to swap, enter the amount, and click the "Swap" button. Approve the transaction in your wallet, and you're good to go!
+Throughout your interaction with the Conxian UI, you will receive real-time feedback through **toast notifications**. These pop-up messages will inform you about the success or failure of your transactions, wallet connections, and other important actions.
 
 ## For Our PRO Users: Unleash the Power of Conxian
 
@@ -38,24 +57,23 @@ Ready to dive in and start building? Here's how to get up and running in no time
 
 ### Step 1: Clone the Repo
 
-```bash
+```
+bash
 git clone https://github.com/Conxian/Conxian-UI.git
 ```
-
 ### Step 2: Install Dependencies
-
-```bash
+```
+bash
 npm install
 ```
-
 ### Step 3: Run the Dev Server
 
-```bash
+```
+bash
 NEXT_PUBLIC_CORE_API_URL=https://api.testnet.hiro.so npm run dev
 ```
-
 And that's it! You're ready to start building.
 
 ## We're Here to Help
 
-Whether you're a retail user, a pro, or a developer, we're here to help you make the most of the Conxian UI. If you have any questions, don't hesitate to reach out to our team. Happy swapping!
+Whether you're a retail user, a pro, or a developer, we're here to help you make the most of the Conxian UI. If you have any questions, don't hesitate to reach out to our team. Happy building!

@@ -9,23 +9,9 @@ import {
 } from "@/lib/coreApi";
 import { decodeResultHex, getUint } from "@/lib/clarity";
 import { standardPrincipalCV, uintCV, cvToHex } from "@stacks/transactions";
-import { openContractCall } from "@stacks/connect";
 import { userSession, connectWallet } from "@/lib/wallet";
-import { AppConfig } from "@/lib/config";
-import { createNetwork } from "@stacks/network";
-import type { StacksNetwork } from "@stacks/network";
 import ConnectWallet from "@/components/ConnectWallet";
-
-function getNetwork(): StacksNetwork {
-  const name = AppConfig.network as "mainnet" | "testnet" | "devnet";
-  if (name === "devnet") {
-    return createNetwork({
-      network: "devnet",
-      client: { baseUrl: AppConfig.coreApiUrl },
-    });
-  }
-  return createNetwork(name);
-}
+import { BankingService } from "@/lib/banking-api";
 
 function formatAmount(amount: string, decimals = 6): string {
   if (!amount) return "0";
@@ -156,53 +142,22 @@ export default function SwapPage() {
       return;
     }
 
-    const router = CoreContracts.find((c) =>
-      c.id.endsWith(".multi-hop-router-v3")
-    );
-    if (!router) {
-      console.error("Router contract not found");
-      return;
-    }
-
-    const [contractAddress, contractName] = router.id.split(".") as [
-      string,
-      string,
-    ];
-    const functionName = "swap-exact-in";
-
-    const fromTokenCV = standardPrincipalCV(fromToken);
-    const toTokenCV = standardPrincipalCV(toToken);
-    const fromAmountCV = uintCV(fromAmount);
-
-    const minToAmount =
-      BigInt(toAmount) -
-      (BigInt(toAmount) * BigInt(Math.floor(slippage * 100))) / BigInt(10000);
-    const minToAmountCV = uintCV(minToAmount);
-
-    const functionArgs = [fromTokenCV, toTokenCV, fromAmountCV, minToAmountCV];
-
     setSending(true);
     setStatus("");
     try {
-      await openContractCall({
-        network: getNetwork(),
-        contractAddress,
-        contractName,
-        functionName,
-        functionArgs,
-        userSession,
-        onFinish: (data) => {
-          setStatus(`Submitted. Tx ID: ${data?.txId || "(see wallet)"}`);
-          setSending(false);
-        },
-        onCancel: () => {
-          setStatus("Cancelled by user");
-          setSending(false);
-        },
+      // Use the new BankingService abstraction
+      const result = await BankingService.executeIntent({
+        type: 'swap',
+        fromToken: fromToken,
+        toToken: toToken,
+        amount: Number(fromAmount) / 1_000_000, // Convert back to STX units as API expects number
       });
+      
+      setStatus(`Submitted. Tx ID: ${result.txId}`);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       setStatus(`Error: ${msg}`);
+    } finally {
       setSending(false);
     }
   };

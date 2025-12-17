@@ -1,4 +1,5 @@
-import base from './generated/base.json';
+
+import base from './generated/base.json' with { type: 'json' };
 
 export type ContractRef = {
   id: string; // principal.contract-name
@@ -38,6 +39,7 @@ export const CoreContracts: ContractRef[] = [
   { id: `${BASE}.performance-optimizer`, label: 'Performance Optimizer', kind: 'monitoring' },
   { id: `${BASE}.finance-metrics`, label: 'Finance Metrics', kind: 'monitoring' },
   { id: `${BASE}.monitoring-dashboard`, label: 'Monitoring Dashboard', kind: 'monitoring' },
+  { id: `${BASE}.shielded-wallet-manager`, label: 'Shielded Wallet Manager', kind: 'security' },
 ];
 
 export function explorerContractUrl(contractId: string, network: 'devnet' | 'testnet' | 'mainnet' = 'testnet') {

@@ -1,7 +1,3 @@
-"use client";
-
-import React from "react";
-import { connectWallet, userSession, signOut } from "@/lib/wallet";
 
 export default function WalletConnectButton() {
   const [address, setAddress] = React.useState<string>(() => {
@@ -32,19 +28,12 @@ export default function WalletConnectButton() {
     };
   }, []);
 
-  const onClick = () => {
-    if (!userSession.isUserSignedIn()) {
-      connectWallet();
-    } else {
-      signOut();
-      setConnected(false);
-      setAddress("");
-    }
-  };
+export default function ConnectWallet() {
+  const { stxAddress, connectWallet, signOut } = useWallet();
 
   return (
     <button
-      onClick={onClick}
+      onClick={() => (stxAddress ? signOut() : connectWallet())}
       className="text-sm px-4 py-2 rounded-md border border-gray-700 hover:bg-gray-800 transition-colors font-medium"
       aria-pressed={connected ? "true" : "false"}
       data-testid="connect-wallet-button"
