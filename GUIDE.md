@@ -24,15 +24,12 @@ The default landing page provides an overview of the Conxian ecosystem.
 
 #### Add Liquidity
 Access the "Add Liquidity" page to contribute tokens to liquidity pools, enabling seamless swaps and earning rewards.
-*(New image needed for Add Liquidity page)*
 
 #### My Positions
 Visit "My Positions" to view and manage your current liquidity positions. Here, you can see your share in various pools and remove liquidity when desired.
-*(New image needed for My Positions page)*
 
 #### Shielded Wallets
 Explore "Shielded Wallets" for enhanced privacy. Create new shielded wallets, manage existing ones, and perform private transactions (send/receive funds).
-*(New image needed for Shielded Wallets page)*
 
 #### Swap
 Click on the "Swap" link to access our user-friendly interface for exchanging one token for another.

@@ -42,6 +42,12 @@ Here's a step-by-step look at how data flows through our app:
 
 We're committed to using the latest and greatest technologies to ensure a stable and secure platform. That's why we've updated our codebase to use the `request` method from `@stacks/connect`, replacing the deprecated `openContractCall`. This ensures we're aligned with the latest standards and best practices.
 
-## 7. Our Promise: A Seamless User Experience
+## 7. Screenshots
+
+Below is a screenshot of the Conxian UI homepage, showcasing the main interface for interacting with the dApp.
+
+![Homepage](docs/images/homepage.png)
+
+## 8. Our Promise: A Seamless User Experience
 
 By combining a modern frontend with the power of the Stacks blockchain, we're able to provide a user-friendly and decentralized platform for interacting with the Conxian ecosystem. We're excited to have you on board!
