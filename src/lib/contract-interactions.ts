@@ -1,5 +1,5 @@
+
 import {
-  
   Cl,
   ClarityValue,
   ContractCallOptions,
@@ -112,6 +112,21 @@ export class ContractInteractions {
     ]);
   }
 
+  static async getLiquidityProviderShare(
+    pairContractId: string,
+    user: string
+  ): Promise<ContractCallResult> {
+    return callReadOnlyContractFunction(pairContractId, 'get-liquidity-provider-share', [
+      Cl.standardPrincipal(user),
+    ]);
+  }
+
+  static async removeLiquidity(pairContractId: string): Promise<void> {
+    // Assuming the contract function takes a percentage of liquidity to remove (u100 for 100%)
+    return callPublicContractFunction(pairContractId, 'remove-liquidity', [Cl.uint(100)]);
+  }
+
+
   // Oracle functions
   static async getPrice(token: string): Promise<ContractCallResult> {
     const oracleContract = CoreContracts.find((c) => c.id.includes('oracle-aggregator-v2'));
@@ -203,4 +218,33 @@ export class ContractInteractions {
         }
         return callReadOnlyContractFunction(analyticsContract.id, 'get-metrics');
     }
+
+  // Shielded Wallet functions
+  static async createShieldedWallet(): Promise<void> {
+    const walletManager = CoreContracts.find((c) => c.id.includes('shielded-wallet-manager'));
+    if (!walletManager) {
+      throw new Error('Shielded Wallet Manager contract not found');
+    }
+    return callPublicContractFunction(walletManager.id, 'create-wallet');
+  }
+
+  static async getShieldedWallets(user: string): Promise<ContractCallResult> {
+    const walletManager = CoreContracts.find((c) => c.id.includes('shielded-wallet-manager'));
+    if (!walletManager) {
+      return { success: false, error: 'Shielded Wallet Manager contract not found' };
+    }
+    return callReadOnlyContractFunction(walletManager.id, 'get-wallets', [Cl.standardPrincipal(user)]);
+  }
+
+  static async getShieldedWalletBalance(walletId: string): Promise<ContractCallResult> {
+    return callReadOnlyContractFunction(walletId, 'get-balance');
+  }
+
+  static async sendFromShieldedWallet(walletId: string, recipient: string, amount: number): Promise<void> {
+    return callPublicContractFunction(walletId, 'send-funds', [Cl.standardPrincipal(recipient), Cl.uint(amount)]);
+  }
+
+  static async receiveToShieldedWallet(walletId: string, amount: number): Promise<void> {
+    return callPublicContractFunction(walletId, 'receive-funds', [Cl.uint(amount)]);
+  }
 }

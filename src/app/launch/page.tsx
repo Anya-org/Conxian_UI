@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/Button";
 import { Progress } from "@/components/ui/Progress";
 import { Badge } from "@/components/ui/Badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
+import { useWallet } from "@/lib/wallet";
 
 interface LaunchPhase {
   id: string;
@@ -35,7 +36,7 @@ interface Contribution {
 export default function LaunchPage() {
   const [totalFunding, setTotalFunding] = useState(0);
   const [contributions, setContributions] = useState<Contribution[]>([]);
-  const [isConnected] = useState(false);
+  const { stxAddress, connectWallet, addToast } = useWallet();
 
   // Mock data - in production, fetch from smart contracts
   const phases: LaunchPhase[] = [
@@ -69,19 +70,25 @@ export default function LaunchPage() {
   ];
 
   const handleContribute = async (amount: number) => {
+    if (!stxAddress) {
+      addToast("Please connect your wallet to contribute.", "info");
+      return;
+    }
     // In production: call smart contract contribution function
     console.log(`Contributing ${amount} STX`);
+    addToast(`Successfully contributed ${amount} STX!`, "success");
+
 
     // Update UI state
     setTotalFunding((prev) => prev + amount);
 
     // Add to contributions list
     const newContribution: Contribution = {
-      address: "ST1...",
+      address: stxAddress,
       amount: amount,
       tokens: amount * 100, // Simplified calculation
       timestamp: Date.now(),
-      level: amount >= 100 ? "whale" : amount >= 10 ? "dolphin" : "fish",
+      level: amount >= 1000 ? "whale" : amount >= 100 ? "dolphin" : amount >= 10 ? "fish" : "minnow",
     };
 
     setContributions((prev) => [newContribution, ...prev]);
@@ -255,8 +262,8 @@ export default function LaunchPage() {
                 <p className="text-sm text-gray-400 mb-4">
                   Your contribution will help deploy the next phase contracts
                 </p>
-                {!isConnected && (
-                  <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                {!stxAddress && (
+                  <Button onClick={connectWallet} className="bg-blue-600 hover:bg-blue-700 text-white">
                     Connect Wallet to Contribute
                   </Button>
                 )}
@@ -267,6 +274,7 @@ export default function LaunchPage() {
 
         <TabsContent value="progress" className="space-y-4">
           <Card>
+.
             <CardHeader>
               <CardTitle>Deployment Progress</CardTitle>
               <CardDescription>
