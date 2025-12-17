@@ -247,4 +247,86 @@ export class ContractInteractions {
   static async receiveToShieldedWallet(walletId: string, amount: number): Promise<void> {
     return callPublicContractFunction(walletId, 'receive-funds', [Cl.uint(amount)]);
   }
+
+  // --- New Contract Interactions for Additional Services ---
+
+  // DEX Router V3
+  static async getRoute(tokenIn: string, tokenOut: string): Promise<ContractCallResult> {
+    const routerContract = CoreContracts.find((c) => c.id.includes('multi-hop-router-v3'));
+    if (!routerContract) return { success: false, error: 'Router V3 not found' };
+    return callReadOnlyContractFunction(routerContract.id, 'get-route', [
+      Cl.standardPrincipal(tokenIn),
+      Cl.standardPrincipal(tokenOut)
+    ]);
+  }
+
+  // Vault
+  static async deposit(token: string, amount: number): Promise<void> {
+    const vaultContract = CoreContracts.find((c) => c.id.includes('vault'));
+    if (!vaultContract) throw new Error('Vault contract not found');
+    return callPublicContractFunction(vaultContract.id, 'deposit', [Cl.standardPrincipal(token), Cl.uint(amount)]);
+  }
+
+  // Bond Factory
+  static async createBond(collateralToken: string, maturityDate: number): Promise<void> {
+    const bondFactory = CoreContracts.find((c) => c.id.includes('bond-factory'));
+    if (!bondFactory) throw new Error('Bond Factory not found');
+    return callPublicContractFunction(bondFactory.id, 'create-bond', [
+      Cl.standardPrincipal(collateralToken),
+      Cl.uint(maturityDate)
+    ]);
+  }
+
+  // Flash Loan Vault
+  static async executeFlashLoan(loanToken: string, loanAmount: number): Promise<void> {
+    const flashLoanVault = CoreContracts.find((c) => c.id.includes('flash-loan-vault'));
+    if (!flashLoanVault) throw new Error('Flash Loan Vault not found');
+    // NOTE: Flash loan execution often requires a callback contract. This is a simplified call.
+    return callPublicContractFunction(flashLoanVault.id, 'request-flash-loan', [
+      Cl.standardPrincipal(loanToken),
+      Cl.uint(loanAmount),
+    ]);
+  }
+
+  // sBTC Vault
+  static async mintSbtc(btcAmount: number): Promise<void> {
+    const sbtcVault = CoreContracts.find((c) => c.id.includes('sbtc-vault'));
+    if (!sbtcVault) throw new Error('sBTC Vault not found');
+    return callPublicContractFunction(sbtcVault.id, 'mint-sbtc', [Cl.uint(btcAmount)]);
+  }
+
+  // Audit Registry
+  static async isAudited(contractId: string): Promise<ContractCallResult> {
+    const auditRegistry = CoreContracts.find((c) => c.id.includes('audit-registry'));
+    if (!auditRegistry) return { success: false, error: 'Audit Registry not found' };
+    return callReadOnlyContractFunction(auditRegistry.id, 'is-audited', [Cl.standardPrincipal(contractId)]);
+  }
+
+  // Governance Verifier
+  static async verifyGovernanceSignature(message: string, signature: string): Promise<ContractCallResult> {
+    const govVerifier = CoreContracts.find((c) => c.id.includes('governance-signature-verifier'));
+    if (!govVerifier) return { success: false, error: 'Governance Verifier not found' };
+    return callReadOnlyContractFunction(govVerifier.id, 'verify-signature', [Cl.stringUtf8(message), Cl.buffer(Buffer.from(signature, 'hex'))]);
+  }
+
+  // Finance Metrics
+  static async getFinancialMetrics(): Promise<ContractCallResult> {
+    const financeMetrics = CoreContracts.find((c) => c.id.includes('finance-metrics'));
+    if (!financeMetrics) return { success: false, error: 'Finance Metrics contract not found' };
+    return callReadOnlyContractFunction(financeMetrics.id, 'get-metrics');
+  }
+
+  // Monitoring Dashboard
+  static async getDashboardData(): Promise<ContractCallResult> {
+    const monitorDashboard = CoreContracts.find((c) => c.id.includes('monitoring-dashboard'));
+    if (!monitorDashboard) return { success: false, error: 'Monitoring Dashboard contract not found' };
+    return callReadOnlyContractFunction(monitorDashboard.id, 'get-dashboard-data');
+  }
+
+  // Performance Optimizer
+  static async getPerformanceRecommendations(): Promise<ContractCallResult> {
+    const perfOptimizer = CoreContracts.find((c) => c.id.includes('performance-optimizer'));
+    if (!perfOptimizer) return { success: false, error: 'Performance Optimizer contract not found' };
+    return callReadOnlyContractFunction(perfOptimizer.id, 'get-recommendations');
+  }
 }
