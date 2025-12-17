@@ -1,8 +1,9 @@
 import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
-  testDir: './',
+  testDir: './tests',
   use: {
+    baseURL: 'http://localhost:3001',
     headless: true,
     viewport: { width: 1280, height: 720 },
     launchOptions: {
@@ -10,8 +11,9 @@ export default defineConfig({
     },
   },
   webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:3000',
-    reuseExistingServer: true,
+    command: 'npm run dev -- -p 3001',
+    url: 'http://localhost:3001',
+    reuseExistingServer: false,
+    timeout: 120 * 1000,
   },
 });
