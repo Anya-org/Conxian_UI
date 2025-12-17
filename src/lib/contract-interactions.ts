@@ -1,4 +1,5 @@
 import {
+  
   Cl,
   ClarityValue,
   ContractCallOptions,
@@ -111,7 +112,7 @@ export class ContractInteractions {
     ]);
   }
 
-// Oracle functions
+  // Oracle functions
   static async getPrice(token: string): Promise<ContractCallResult> {
     const oracleContract = CoreContracts.find((c) => c.id.includes('oracle-aggregator-v2'));
     if (!oracleContract) {
@@ -144,4 +145,62 @@ export class ContractInteractions {
     }
     return callReadOnlyContractFunction(vaultContract.id, 'get-total-balance');
   }
+
+  // --- New Services aligned with contracts.ts ---
+
+  // Security - Circuit Breaker
+  static async getCircuitBreakerStatus(): Promise<ContractCallResult> {
+    const breakerContract = CoreContracts.find((c) => c.id.includes('circuit-breaker'));
+    if (!breakerContract) {
+        return { success: false, error: 'Circuit Breaker contract not found' };
+    }
+    return callReadOnlyContractFunction(breakerContract.id, 'get-status');
+  }
+
+  // Rewards - Staking
+  static async getStakingInfo(user: string): Promise<ContractCallResult> {
+      const stakingContract = CoreContracts.find((c) => c.id.includes('cxd-staking'));
+      if (!stakingContract) {
+          return { success: false, error: 'Staking contract not found' };
+      }
+      return callReadOnlyContractFunction(stakingContract.id, 'get-staker-info', [
+          Cl.standardPrincipal(user)
+      ]);
+  }
+
+  // Monitoring - System Monitor
+  static async getSystemHealth(): Promise<ContractCallResult> {
+      const monitorContract = CoreContracts.find((c) => c.id.includes('system-monitor'));
+      if (!monitorContract) {
+          return { success: false, error: 'System Monitor contract not found' };
+      }
+      return callReadOnlyContractFunction(monitorContract.id, 'get-system-health');
+  }
+
+  // Enterprise - Enterprise API
+  static async getEnterpriseConfig(): Promise<ContractCallResult> {
+      const entContract = CoreContracts.find((c) => c.id.includes('enterprise-api'));
+      if (!entContract) {
+          return { success: false, error: 'Enterprise API contract not found' };
+      }
+      return callReadOnlyContractFunction(entContract.id, 'get-config');
+  }
+
+  // Yield Optimizer
+  static async getYieldStrategies(): Promise<ContractCallResult> {
+      const yieldContract = CoreContracts.find((c) => c.id.includes('yield-optimizer'));
+      if (!yieldContract) {
+          return { success: false, error: 'Yield Optimizer contract not found' };
+      }
+      return callReadOnlyContractFunction(yieldContract.id, 'get-strategies');
+  }
+
+    // Analytics Aggregator
+    static async getAggregatedMetrics(): Promise<ContractCallResult> {
+        const analyticsContract = CoreContracts.find((c) => c.id.includes('analytics-aggregator'));
+        if (!analyticsContract) {
+            return { success: false, error: 'Analytics Aggregator contract not found' };
+        }
+        return callReadOnlyContractFunction(analyticsContract.id, 'get-metrics');
+    }
 }

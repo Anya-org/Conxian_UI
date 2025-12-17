@@ -9,6 +9,7 @@ import {
 import { createNetwork } from "@stacks/network";
 import type { StacksNetwork } from "@stacks/network";
 import { userSession } from "@/lib/wallet";
+import { CoreContracts } from "@/lib/contracts";
 
 // --- Types ---
 
@@ -33,6 +34,17 @@ function getNetwork(): StacksNetwork {
     });
   }
   return createNetwork(name);
+}
+
+// --- Helpers ---
+
+function getContractId(key: string): { address: string; name: string } {
+  const contract = CoreContracts.find((c) => c.id.includes(key));
+  if (!contract) {
+    throw new Error(`Contract containing '${key}' not found in registry.`);
+  }
+  const [address, name] = contract.id.split(".");
+  return { address, name };
 }
 
 // --- The Banking Abstraction Layer ---
@@ -69,8 +81,10 @@ export class BankingService {
         });
       }
 
-      // 2. Invest in Pool (Mock Contract Call)
+      // 2. Invest in Pool
       else if (intent.type === "invest-pool") {
+        const { address, name } = getContractId("concentrated-liquidity-pool");
+        
         // Post-Condition Builder Pattern
         const safePostCondition = Pc.principal(myAddress)
           .willSendEq(intent.amount * 1_000_000)
@@ -78,8 +92,8 @@ export class BankingService {
 
         openContractCall({
           network,
-          contractAddress: "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5", // Example Contract
-          contractName: "arkadiko-swap-v2-1", // Example Pool
+          contractAddress: address,
+          contractName: name,
           functionName: "add-liquidity",
           functionArgs: [
             uintCV(intent.amount * 1_000_000),
@@ -95,8 +109,11 @@ export class BankingService {
         });
       }
 
-      // 3. Swap (Mock)
+      // 3. Swap
       else if (intent.type === "swap") {
+        // Use DEX Router for swaps
+        const { address, name } = getContractId("dex-router");
+        
         // Example: Swapping STX for Token
         const safePostCondition = Pc.principal(myAddress)
           .willSendEq(intent.amount * 1_000_000)
@@ -104,8 +121,8 @@ export class BankingService {
 
         openContractCall({
           network,
-          contractAddress: "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5",
-          contractName: "arkadiko-swap-v2-1",
+          contractAddress: address,
+          contractName: name,
           functionName: "swap-x-for-y",
           functionArgs: [
             standardPrincipalCV(intent.fromToken),

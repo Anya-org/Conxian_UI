@@ -1,4 +1,4 @@
-import base from './generated/base.json';
+import base from './generated/base.json' with { type: 'json' };
 
 export type ContractRef = {
   id: string; // principal.contract-name
