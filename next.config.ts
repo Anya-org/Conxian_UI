@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   // Allow Edge DevTools or other local proxies to request dev assets
   // allowedDevOrigins: ['127.0.0.1', 'localhost'], // Remove this line
   output: 'export', // Add this line for static export
+  trailingSlash: true, // Add this for static export 404 fix
   env: {
     NEXT_PUBLIC_CORE_API_URL: process.env.NEXT_PUBLIC_CORE_API_URL || process.env.CORE_API_URL || "https://api.testnet.hiro.so",
   },
@@ -20,6 +21,9 @@ const nextConfig: NextConfig = {
   //   }
   //   return [];
   // },
+  images: {
+    unoptimized: true,
+  },
 };
 
 export default nextConfig;
