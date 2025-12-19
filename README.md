@@ -19,6 +19,13 @@ Our "earthy corporate finance" theme is designed to be both professional and inv
 *   **Accent**: #D4A017 (a touch of sophisticated gold)
 *   **Neutrals**: #F5F5F5, #E0E0E0, #333333 (for a clean, modern look)
 
+## Key Features
+
+*   **Swap**: Seamlessly exchange tokens with our optimized swap interface.
+*   **Liquidity Management**: Add liquidity to pools and manage your positions.
+*   **Shielded Wallets**: Enhance your privacy with shielded wallet creation and management.
+*   **Community Launch**: Participate in the decentralized self-launch of the protocol.
+
 ## Getting Started
 
 Ready to dive in? Here's how to get up and running:

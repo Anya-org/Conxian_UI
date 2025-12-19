@@ -17,22 +17,25 @@ The "backend" of our application is the suite of Conxian smart contracts on the 
 *   **`src/lib/contracts.ts`**: Think of this as our address book. It stores the locations and details of all our smart contracts, from tokens to DEX components.
 *   **`src/lib/coreApi.ts`**: This is our low-level communication toolkit. It handles the nitty-gritty of making API calls to the Stacks blockchain, such as fetching balances or making read-only contract calls.
 *   **`src/lib/contract-interactions.ts`**: This is where the magic happens. We use the `@stacks/transactions` and `@stacks/connect` libraries to build and send transactions, making it easy to interact with our smart contracts.
+*   **`src/lib/contracts/self-launch.ts`**: Dedicated handler for the Community Self-Launch system, managing phases, funding, and stats.
 
 ## 4. The User Interface
 
 The Conxian UI is built with Next.js and Tailwind CSS. We also use a set of reusable UI components to ensure a consistent look and feel throughout the application.
 
-### Our UI Toolkit:
+### Key Pages & Components:
 
-*   **`src/components/ui/VStack.tsx`**: A reusable component for vertical stacking of elements.
-*   **`src/components/ui/StatCard.tsx`**: A reusable component for displaying statistics in a card format.
+*   **Swap (`src/app/swap/page.tsx`)**: The core trading interface.
+*   **Launch (`src/app/launch/page.tsx`)**: The community self-launch dashboard.
+*   **Shielded (`src/app/shielded/page.tsx`)**: Privacy-focused wallet management.
+*   **Reusable UI**: Components in `src/components/ui` like `Card`, `Button`, `VStack`, `StatCard` ensuring consistency.
 
 ## 5. The User's Journey: A Data Flow Story
 
 Here's a step-by-step look at how data flows through our app:
 
 1.  **A User's Click**: The journey begins when a user interacts with a UI component, like clicking the "Swap" button.
-2.  **A Call to Action**: The UI then calls a function from `src/lib/contract-interactions.ts`.
+2.  **A Call to Action**: The UI then calls a function from `src/lib/contract-interactions.ts` or specific hooks like `useSelfLaunch`.
 3.  **A Conversation with the Blockchain**:
     *   For read-only operations (like checking a balance), we use `fetchCallReadOnlyFunction` from `@stacks/transactions` to query a Stacks node.
     *   For transactions (like making a swap), we use `request` from `@stacks/connect` to open a wallet pop-up, allowing the user to approve the transaction securely.
@@ -44,9 +47,16 @@ We're committed to using the latest and greatest technologies to ensure a stable
 
 ## 7. Screenshots
 
-Below is a screenshot of the Conxian UI homepage, showcasing the main interface for interacting with the dApp.
+Below are screenshots of the Conxian UI key interfaces.
 
+### Homepage
 ![Homepage](docs/images/homepage.png)
+
+### Launch Dashboard
+![Launch Page](docs/images/launch_page.png)
+
+### Swap Interface
+![Swap Page](docs/images/guide_02_swap_page.png)
 
 ## 8. Our Promise: A Seamless User Experience
 

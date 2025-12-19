@@ -1,4 +1,3 @@
-md
 # Welcome to the Conxian UI!
 
 This guide is your one-stop shop for mastering the Conxian UI. Whether you're a casual user or a seasoned pro, we've got you covered.
@@ -22,14 +21,29 @@ The default landing page provides an overview of the Conxian ecosystem.
 
 ![Homepage](docs/images/homepage.png)
 
+#### Launch (Community Self-Launch)
+Participate in the community-driven launch of the Conxian protocol.
+*   **Overview**: Track the current launch phase, total funds raised, and active contributors.
+*   **Contribute**: Support the project by contributing STX.
+*   **Progress**: View detailed progress of each launch phase.
+*   **Leaderboard**: See top contributors and your own standing.
+
+![Launch Page](docs/images/launch_page.png)
+
 #### Add Liquidity
 Access the "Add Liquidity" page to contribute tokens to liquidity pools, enabling seamless swaps and earning rewards.
+
+![Add Liquidity](docs/images/add_liquidity_page.png)
 
 #### My Positions
 Visit "My Positions" to view and manage your current liquidity positions. Here, you can see your share in various pools and remove liquidity when desired.
 
+![Positions](docs/images/positions_page.png)
+
 #### Shielded Wallets
 Explore "Shielded Wallets" for enhanced privacy. Create new shielded wallets, manage existing ones, and perform private transactions (send/receive funds).
+
+![Shielded Wallets](docs/images/shielded_page.png)
 
 #### Swap
 Click on the "Swap" link to access our user-friendly interface for exchanging one token for another.
@@ -56,19 +70,16 @@ Ready to dive in and start building? Here's how to get up and running in no time
 
 ### Step 1: Clone the Repo
 
-```
-bash
+```bash
 git clone https://github.com/Conxian/Conxian-UI.git
 ```
 ### Step 2: Install Dependencies
-```
-bash
+```bash
 npm install
 ```
 ### Step 3: Run the Dev Server
 
-```
-bash
+```bash
 NEXT_PUBLIC_CORE_API_URL=https://api.testnet.hiro.so npm run dev
 ```
 And that's it! You're ready to start building.
