@@ -21,7 +21,6 @@ export const apiClient = {
 
   // --- Vault ---
   getVaultBalance: ApiService.getVaultBalance,
-  mintSbtc: ApiService.mintSbtc,
 
   // --- Bond ---
   createBond: ApiService.createBond,
@@ -54,11 +53,17 @@ export const apiClient = {
   getYieldStrategies: ApiService.getYieldStrategies,
 
   // --- Shielded Wallet ---
-  createShieldedWallet: ApiService.createShieldedWallet,
-  getShieldedWallets: ApiService.getShieldedWallets,
-  getShieldedWalletBalance: ApiService.getShieldedWalletBalance,
-  sendFromShieldedWallet: ApiService.sendFromShieldedWallet,
-  receiveToShieldedWallet: ApiService.receiveToShieldedWallet,
+  createNewWallet: ApiService.createNewWallet,
+  fetchUserWallets: ApiService.fetchUserWallets,
+  fetchWalletBalance: ApiService.fetchWalletBalance,
+  sendFunds: ApiService.sendFunds,
+  receiveFunds: ApiService.receiveFunds,
+
+  // --- Banking ---
+  executeIntent: ApiService.executeIntent,
+
+  // --- Positions ---
+  getPositions: ApiService.getPositions,
 };
 
 // --- Data Fetching Hooks (for use in UI components) ---

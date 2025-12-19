@@ -1,7 +1,7 @@
 // src/app/launch/page.tsx - Community Self-Launch Dashboard
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -14,85 +14,62 @@ import { Progress } from "@/components/ui/Progress";
 import { Badge } from "@/components/ui/Badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
 import { useWallet } from "@/lib/wallet";
-
-interface LaunchPhase {
-  id: string;
-  name: string;
-  funding: number;
-  target: number;
-  contributors: number;
-  contracts: string[];
-  status: "pending" | "active" | "completed";
-}
-
-interface Contribution {
-  address: string;
-  amount: number;
-  tokens: number;
-  timestamp: number;
-  level: string;
-}
+import { useSelfLaunch } from "@/lib/hooks/use-self-launch";
+import { Input } from "@/components/ui/Input";
 
 export default function LaunchPage() {
-  const [totalFunding, setTotalFunding] = useState(0);
-  const [contributions, setContributions] = useState<Contribution[]>([]);
   const { stxAddress, connectWallet, addToast } = useWallet();
+  const {
+    currentPhase,
+    fundingProgress,
+    communityStats,
+    userContribution,
+    isLoading,
+    error,
+    contribute,
+    getUserContribution,
+  } = useSelfLaunch('testnet');
 
-  // Mock data - in production, fetch from smart contracts
-  const phases: LaunchPhase[] = [
-    {
-      id: "bootstrap",
-      name: "Community Bootstrap",
-      funding: 100,
-      target: 500,
-      contributors: 3,
-      contracts: ["all-traits", "utils-encoding", "utils-utils"],
-      status: "active",
-    },
-    {
-      id: "micro_core",
-      name: "Micro Core",
-      funding: 0,
-      target: 1000,
-      contributors: 0,
-      contracts: ["cxd-price-initializer", "token-system-coordinator"],
-      status: "pending",
-    },
-    {
-      id: "token_system",
-      name: "Token System",
-      funding: 0,
-      target: 2500,
-      contributors: 0,
-      contracts: ["cxd-token", "token-emission-controller"],
-      status: "pending",
-    },
-  ];
+  const [contributionAmount, setContributionAmount] = useState("100");
+
+  useEffect(() => {
+    if (stxAddress) {
+      getUserContribution(stxAddress);
+    }
+  }, [stxAddress, getUserContribution]);
 
   const handleContribute = async (amount: number) => {
     if (!stxAddress) {
       addToast("Please connect your wallet to contribute.", "info");
       return;
     }
-    // In production: call smart contract contribution function
-    console.log(`Contributing ${amount} STX`);
-    addToast(`Successfully contributed ${amount} STX!`, "success");
 
+    const result = await contribute(stxAddress, amount);
 
-    // Update UI state
-    setTotalFunding((prev) => prev + amount);
-
-    // Add to contributions list
-    const newContribution: Contribution = {
-      address: stxAddress,
-      amount: amount,
-      tokens: amount * 100, // Simplified calculation
-      timestamp: Date.now(),
-      level: amount >= 1000 ? "whale" : amount >= 100 ? "dolphin" : amount >= 10 ? "fish" : "minnow",
-    };
-
-    setContributions((prev) => [newContribution, ...prev]);
+    if (result.success) {
+      addToast(`Successfully contributed ${amount} STX!`, "success");
+    } else {
+      addToast(result.error || "Contribution failed.", "error");
+    }
   };
+
+  const phases = currentPhase ? [{
+    id: currentPhase.id,
+    name: currentPhase.name,
+    funding: fundingProgress.current,
+    target: fundingProgress.target,
+    contributors: communityStats?.totalContributors || 0,
+    contracts: currentPhase.requiredContracts,
+    status: currentPhase.status as "pending" | "active" | "completed",
+  }] : [];
+
+  if (isLoading && !currentPhase) {
+    return <div className="text-center p-8">Loading launch data...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center p-8 text-red-500">Error: {error}</div>;
+  }
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -105,32 +82,18 @@ export default function LaunchPage() {
         </p>
       </div>
 
+      {!stxAddress && (
+        <div className="text-center">
+          <Button onClick={connectWallet}>Connect Wallet</Button>
+        </div>
+      )}
+
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList className="grid w-full grid-cols-4 bg-gray-900 border border-gray-700">
-          <TabsTrigger
-            value="overview"
-            className="data-[state=active]:bg-gray-800 data-[state=active]:text-white text-gray-400"
-          >
-            Overview
-          </TabsTrigger>
-          <TabsTrigger
-            value="contribute"
-            className="data-[state=active]:bg-gray-800 data-[state=active]:text-white text-gray-400"
-          >
-            Contribute
-          </TabsTrigger>
-          <TabsTrigger
-            value="progress"
-            className="data-[state=active]:bg-gray-800 data-[state=active]:text-white text-gray-400"
-          >
-            Progress
-          </TabsTrigger>
-          <TabsTrigger
-            value="leaderboard"
-            className="data-[state=active]:bg-gray-800 data-[state=active]:text-white text-gray-400"
-          >
-            Community
-          </TabsTrigger>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="contribute">Contribute</TabsTrigger>
+          <TabsTrigger value="progress">Progress</TabsTrigger>
+          <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -141,7 +104,7 @@ export default function LaunchPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-neutral-light">
-                  Bootstrap
+                  {currentPhase?.name || 'N/A'}
                 </div>
                 <p className="text-gray-400">Core infrastructure deployment</p>
               </CardContent>
@@ -153,7 +116,7 @@ export default function LaunchPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-neutral-light">
-                  {totalFunding} STX
+                  {fundingProgress.current} STX
                 </div>
                 <p className="text-gray-400">Community contributions</p>
               </CardContent>
@@ -165,7 +128,7 @@ export default function LaunchPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-neutral-light">
-                  {contributions.length}
+                  {communityStats?.totalContributors || 0}
                 </div>
                 <p className="text-gray-400">Active community members</p>
               </CardContent>
@@ -217,106 +180,26 @@ export default function LaunchPage() {
         <TabsContent value="contribute" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Make a Contribution</CardTitle>
+              <CardTitle>Contribute to the Launch</CardTitle>
               <CardDescription>
-                Help fund the next phase of Conxian development
+                Support the Conxian network and earn rewards.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <Button
-                  onClick={() => handleContribute(1)}
-                  variant="outline"
-                  className="h-20 flex flex-col border-gray-600 hover:bg-gray-800 text-gray-300"
-                >
-                  <span className="text-lg font-bold">1 STX</span>
-                  <span className="text-sm">Minnow</span>
-                </Button>
-                <Button
-                  onClick={() => handleContribute(10)}
-                  variant="outline"
-                  className="h-20 flex flex-col border-gray-600 hover:bg-gray-800 text-gray-300"
-                >
-                  <span className="text-lg font-bold">10 STX</span>
-                  <span className="text-sm">Fish</span>
-                </Button>
-                <Button
-                  onClick={() => handleContribute(100)}
-                  variant="outline"
-                  className="h-20 flex flex-col border-gray-600 hover:bg-gray-800 text-gray-300"
-                >
-                  <span className="text-lg font-bold">100 STX</span>
-                  <span className="text-sm">Dolphin</span>
-                </Button>
-                <Button
-                  onClick={() => handleContribute(1000)}
-                  variant="outline"
-                  className="h-20 flex flex-col border-gray-600 hover:bg-gray-800 text-gray-300"
-                >
-                  <span className="text-lg font-bold">1000 STX</span>
-                  <span className="text-sm">Whale</span>
+              <div className="flex items-center space-x-2">
+                <Input
+                  type="number"
+                  value={contributionAmount}
+                  onChange={(e) => setContributionAmount(e.target.value)}
+                  placeholder="STX Amount"
+                  className="max-w-xs"
+                />
+                <Button onClick={() => handleContribute(Number(contributionAmount))}>
+                  Contribute
                 </Button>
               </div>
-
-              <div className="text-center">
-                <p className="text-sm text-gray-400 mb-4">
-                  Your contribution will help deploy the next phase contracts
-                </p>
-                {!stxAddress && (
-                  <Button onClick={connectWallet} className="bg-blue-600 hover:bg-blue-700 text-white">
-                    Connect Wallet to Contribute
-                  </Button>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="progress" className="space-y-4">
-          <Card>
-.
-            <CardHeader>
-              <CardTitle>Deployment Progress</CardTitle>
-              <CardDescription>
-                Contracts deployed in each phase
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {phases.map((phase) => (
-                  <div
-                    key={phase.id}
-                    className="border border-gray-700 rounded-lg p-4 bg-gray-800"
-                  >
-                    <div className="flex justify-between items-center mb-2">
-                      <h3 className="font-semibold text-gray-300">
-                        {phase.name}
-                      </h3>
-                      <Badge>{phase.status}</Badge>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-gray-400">Contracts:</span>
-                        <div className="font-mono text-xs mt-1 text-gray-300">
-                          {phase.contracts.join(", ")}
-                        </div>
-                      </div>
-                      <div>
-                        <span className="text-gray-400">Progress:</span>
-                        <div className="mt-1">
-                          <Progress
-                            value={(phase.funding / phase.target) * 100}
-                            className="bg-gray-700"
-                          />
-                          <div className="flex justify-between mt-1 text-xs text-gray-400">
-                            <span>{phase.funding} STX</span>
-                            <span>{phase.target} STX target</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+              <div className="text-sm text-gray-400">
+                Your contribution: {userContribution.total || 0} STX
               </div>
             </CardContent>
           </Card>
@@ -332,12 +215,12 @@ export default function LaunchPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {contributions.length === 0 ? (
+                {!communityStats?.topContributors || communityStats.topContributors.length === 0 ? (
                   <p className="text-center text-gray-400 py-8">
                     No contributions yet. Be the first!
                   </p>
                 ) : (
-                  contributions.map((contrib, index) => (
+                  communityStats.topContributors.map((contrib, index) => (
                     <div
                       key={index}
                       className="flex justify-between items-center p-3 border border-gray-700 rounded bg-gray-800"
@@ -345,9 +228,6 @@ export default function LaunchPage() {
                       <div>
                         <div className="font-medium text-gray-300">
                           {contrib.address.substring(0, 8)}...
-                        </div>
-                        <div className="text-sm text-gray-400">
-                          {new Date(contrib.timestamp).toLocaleDateString()}
                         </div>
                       </div>
                       <div className="text-right">

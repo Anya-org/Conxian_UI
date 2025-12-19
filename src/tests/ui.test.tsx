@@ -1,5 +1,5 @@
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, act, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import ConnectWallet from '@/components/ConnectWallet';
@@ -13,6 +13,25 @@ vi.mock('@/lib/api-client', () => ({
     getDashboardMetrics: vi.fn().mockResolvedValue({
       systemHealth: { success: true, result: 'OK' },
     }),
+  }),
+}));
+
+// Mock the useSelfLaunch hook
+vi.mock('@/lib/hooks/use-self-launch', () => ({
+  useSelfLaunch: vi.fn().mockReturnValue({
+    currentPhase: {
+      id: '1',
+      name: 'Phase 1',
+      status: 'active',
+      requiredContracts: [],
+    },
+    fundingProgress: { current: 5000, target: 10000 },
+    communityStats: { contributors: 10, topContributors: [{ address: 'SP2Z...W8L', amount: 1000, level: 'Gold' }] },
+    userContribution: 100,
+    isLoading: false,
+    error: null,
+    contribute: vi.fn().mockResolvedValue({ success: true }),
+    getUserContribution: vi.fn(),
   }),
 }));
 
@@ -32,9 +51,26 @@ describe('UI Components', () => {
         <LaunchPage />
       </WalletProvider>
     );
-    await userEvent.click(screen.getByText('Contribute'));
+
+    // Find the "Contribute" tab
+    const contributeTab = screen.getByRole('tab', { name: /contribute/i });
+    
+    await act(async () => {
+      await userEvent.click(contributeTab);
+    });
+
+    // Find the tab panel. There should be only one visible at a time.
+    const tabPanel = screen.getByRole('tabpanel');
+
+    // Within the tab panel, find and click the "Contribute" button
+    const contributeButton = within(tabPanel).getByRole('button', { name: /contribute/i });
+    await act(async () => {
+      await userEvent.click(contributeButton);
+    });
+
+    // Check for the toast message
     expect(
-      screen.getByText('Connect Wallet to Contribute')
+      await screen.findByText('Please connect your wallet to contribute.')
     ).toBeInTheDocument();
   });
 
@@ -47,8 +83,9 @@ describe('UI Components', () => {
         </button>
       </WalletProvider>
     );
-
-    await userEvent.click(screen.getByText('Refresh Metrics'));
+    await act(async () => {
+      await userEvent.click(screen.getByText('Refresh Metrics'));
+    });
     expect(mockApi.getDashboardMetrics).toHaveBeenCalled();
   });
 });

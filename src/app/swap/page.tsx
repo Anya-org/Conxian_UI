@@ -6,12 +6,23 @@ import {
   callReadOnly,
   getFungibleTokenBalances,
   FungibleTokenBalance,
-} from "@/lib/coreApi";
+} from "@/lib/core-api";
 import { decodeResultHex, getUint } from "@/lib/clarity";
 import { standardPrincipalCV, uintCV, cvToHex } from "@stacks/transactions";
-import { userSession, connectWallet } from "@/lib/wallet";
+import { useWallet } from "@/lib/wallet";
 import ConnectWallet from "@/components/ConnectWallet";
-import { BankingService } from "@/lib/banking-api";
+import { useApi } from "@/lib/api-client";
+
+// Re-styled components
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Badge } from "@/components/ui/Badge";
+
+
+// --- Helper Functions ---
+// No change in helper functions, keeping them as is.
 
 function formatAmount(amount: string, decimals = 6): string {
   if (!amount) return "0";
@@ -51,18 +62,7 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/Card";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/Tabs";
+// --- Main Swap Page Component ---
 
 export default function SwapPage() {
   const [fromToken, setFromToken] = React.useState(Tokens[0].id);
@@ -75,7 +75,8 @@ export default function SwapPage() {
   const [loading, setLoading] = React.useState(false);
   const [sending, setSending] = React.useState(false);
   const [status, setStatus] = React.useState<string>("");
-  const [isSignedIn, setIsSignedIn] = React.useState(false);
+  const { connectWallet, stxAddress } = useWallet();
+  const api = useApi();
 
   const fromTokenInfo = Tokens.find((t) => t.id === fromToken);
   const toTokenInfo = Tokens.find((t) => t.id === toToken);
@@ -120,7 +121,7 @@ export default function SwapPage() {
         contractAddress,
         argsHex
       );
-      if (res.ok && res.result) {
+      if (res.okay && res.result) {
         const decoded = decodeResultHex(res.result);
         if (decoded && decoded.ok) {
           const uint = getUint(decoded.value);
@@ -137,7 +138,7 @@ export default function SwapPage() {
   const handleSwap = async () => {
     if (!fromToken || !toToken || !fromAmount || !toAmount || isSameToken)
       return;
-    if (!userSession.isUserSignedIn()) {
+    if (!stxAddress) {
       setStatus("Please connect wallet to swap");
       return;
     }
@@ -145,12 +146,11 @@ export default function SwapPage() {
     setSending(true);
     setStatus("");
     try {
-      // Use the new BankingService abstraction
-      const result = await BankingService.executeIntent({
+      const result = await api.executeIntent({
         type: 'swap',
         fromToken: fromToken,
         toToken: toToken,
-        amount: Number(fromAmount) / 1_000_000, // Convert back to STX units as API expects number
+        amount: Number(fromAmount) / 1_000_000,
       });
       
       setStatus(`Submitted. Tx ID: ${result.txId}`);
@@ -168,8 +168,8 @@ export default function SwapPage() {
       setFromAmount(parseAmount(value, fromTokenInfo?.decimals));
     }
   };
-
-  const handleFromTokenChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  
+    const handleFromTokenChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setFromToken(e.target.value);
     setToAmount("");
   };
@@ -192,20 +192,15 @@ export default function SwapPage() {
   }, [getEstimate]);
 
   React.useEffect(() => {
-    const session = userSession.isUserSignedIn();
-    if (session) {
-      setIsSignedIn(true);
-      const { address } = userSession.loadUserData().profile.stxAddress;
-      getFungibleTokenBalances(address).then(setBalances);
-    } else {
-      setIsSignedIn(false);
+    if (stxAddress) {
+      getFungibleTokenBalances(stxAddress).then(setBalances);
     }
-  }, []);
+  }, [stxAddress]);
 
   return (
-    <div className="min-h-screen w-full p-6 sm:p-10 space-y-8">
+    <div className="min-h-screen w-full p-6 sm:p-10 space-y-8 bg-background-light dark:bg-background-DEFAULT">
       <header className="flex items-center justify-between mb-10">
-        <h1 className="text-3xl font-bold text-neutral-light">Swap</h1>
+        <h1 className="text-3xl font-bold text-text-primary">Swap</h1>
         <div className="lg:hidden">
           <ConnectWallet />
         </div>
@@ -213,189 +208,128 @@ export default function SwapPage() {
       <Tabs defaultValue="simple" className="w-full max-w-md mx-auto">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="simple">Simple</TabsTrigger>
-          <TabsTrigger value="optimized">Optimized</TabsTrigger>
+          <TabsTrigger value="optimized" disabled>Optimized</TabsTrigger>
         </TabsList>
         <TabsContent value="simple">
-          <Card>
+          <Card className="bg-background-paper">
             <CardHeader>
-              <CardTitle>Simple Swap</CardTitle>
+              <CardTitle className="text-text-primary">Simple Swap</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-3">
-                <div>
-                  <div className="flex justify-between items-center text-xs mb-1">
-                    <label>From</label>
-                    <span>
-                      Balance:{" "}
-                      {fromTokenBalance
-                        ? formatAmount(
-                            fromTokenBalance.balance,
-                            fromTokenInfo?.decimals
-                          )
-                        : 0}
-                    </span>
-                  </div>
-                  <div className="flex gap-2">
-                    <select
-                      aria-label="From token"
-                      className="border rounded px-2 py-1 w-full text-black"
-                      value={fromToken}
-                      onChange={handleFromTokenChange}
-                    >
-                      {Tokens.map((t) => (
-                        <option key={t.id} value={t.id}>
-                          {t.label}
-                        </option>
-                      ))}
-                    </select>
-                    <input
-                      aria-label="From amount"
-                      className="border rounded px-2 py-1 w-full text-black"
-                      value={formatAmount(fromAmount, fromTokenInfo?.decimals)}
-                      onChange={handleFromAmountChange}
-                    />
-                    <button
-                      onClick={() =>
-                        setFromAmount(fromTokenBalance?.balance || "0")
-                      }
-                      className="text-xs px-2 py-1 rounded-md border border-gray-300 dark:border-gray-600"
-                    >
-                      Max
-                    </button>
-                  </div>
+            <CardContent className="space-y-6">
+              {/* From Token */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-sm">
+                  <label htmlFor="from-token" className="text-text-secondary">From</label>
+                  <span className="text-text-muted">
+                    Balance: {fromTokenBalance ? formatAmount(fromTokenBalance.balance, fromTokenInfo?.decimals) : 0}
+                  </span>
                 </div>
-                <div className="text-center">
-                  <button
-                    onClick={invertTokens}
-                    className="p-1 rounded-full border border-gray-300 dark:border-gray-600"
+                <div className="flex items-center gap-2">
+                  <select
+                    id="from-token"
+                    value={fromToken}
+                    onChange={handleFromTokenChange}
+                    className="w-full rounded-md border-gray-600 bg-background-paper text-text-primary py-2 px-3"
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M7 16V4m0 12l-4-4m4 4l4-4m6 8v-12m0 12l4-4m-4 4l-4-4"
-                      />
-                    </svg>
-                  </button>
-                </div>
-                <div>
-                  <label className="text-xs block mb-1">To</label>
-                  <div className="flex gap-2">
-                    <select
-                      aria-label="To token"
-                      className="border rounded px-2 py-1 w-full text-black"
-                      value={toToken}
-                      onChange={handleToTokenChange}
-                    >
-                      {Tokens.map((t) => (
-                        <option key={t.id} value={t.id}>
-                          {t.label}
-                        </option>
-                      ))}
-                    </select>
-                    <input
-                      aria-label="To amount"
-                      className="border rounded px-2 py-1 w-full text-black"
-                      value={formatAmount(toAmount, toTokenInfo?.decimals)}
-                      readOnly
-                    />
-                  </div>
+                    {Tokens.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
+                  </select>
+                  <Input
+                    type="text"
+                    id="from-amount"
+                    value={formatAmount(fromAmount, fromTokenInfo?.decimals)}
+                    onChange={handleFromAmountChange}
+                    className="w-full text-right"
+                  />
                 </div>
               </div>
 
-              <div className="flex items-center justify-between text-xs">
-                <label>Slippage tolerance</label>
+              {/* Invert Button */}
+              <div className="flex justify-center">
+                <Button onClick={invertTokens} variant="outline" size="icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 12l-4-4m4 4l4-4m6 8v-12m0 12l4-4m-4 4l-4-4" />
+                  </svg>
+                </Button>
+              </div>
+
+              {/* To Token */}
+              <div className="space-y-2">
+                <label htmlFor="to-token" className="text-sm text-text-secondary">To</label>
                 <div className="flex items-center gap-2">
-                  <input
+                  <select
+                    id="to-token"
+                    value={toToken}
+                    onChange={handleToTokenChange}
+                    className="w-full rounded-md border-gray-600 bg-background-paper text-text-primary py-2 px-3"
+                  >
+                    {Tokens.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
+                  </select>
+                  <Input
+                    type="text"
+                    id="to-amount"
+                    value={formatAmount(toAmount, toTokenInfo?.decimals)}
+                    readOnly
+                    className="w-full text-right"
+                    placeholder="0.0"
+                  />
+                </div>
+              </div>
+
+              {/* Slippage */}
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-text-secondary">Slippage Tolerance</span>
+                <div className="flex items-center gap-2">
+                  {[0.1, 0.5, 1.0].map(val => (
+                    <Badge
+                      key={val}
+                      onClick={() => setSlippage(val)}
+                      className={`cursor-pointer ${slippage === val ? 'bg-primary-dark' : 'bg-gray-700'}`}
+                    >
+                      {val}%
+                    </Badge>
+                  ))}
+                  <Input
                     type="number"
                     value={slippage}
-                    onChange={(e) => setSlippage(parseFloat(e.target.value))}
-                    className="border rounded px-2 py-1 w-20 text-right text-black"
+                    onChange={e => setSlippage(parseFloat(e.target.value))}
+                    className="w-20 text-right"
                   />
-                  <span>%</span>
                 </div>
               </div>
 
-              <div className="flex items-center justify-center">
-                {isSignedIn ? (
-                  <button
+              {/* Action Button */}
+              <div className="pt-4">
+                {stxAddress ? (
+                  <Button
                     onClick={handleSwap}
                     disabled={loading || sending || isSameToken}
-                    className="text-sm px-3 py-1.5 rounded-md border border-gray-300 dark:border-gray-600 flex items-center gap-2"
+                    className="w-full bg-primary-DEFAULT hover:bg-primary-dark text-white"
                   >
-                    {loading && <Spinner />}
-                    {sending
-                      ? "Sending..."
-                      : loading
-                      ? "Getting estimate..."
-                      : isSameToken
-                      ? "Select different tokens"
-                      : "Swap"}
-                  </button>
+                    {sending ? "Sending..." : loading ? "Getting estimate..." : "Swap"}
+                  </Button>
                 ) : (
-                  <button
-                    onClick={connectWallet}
-                    className="text-sm px-3 py-1.5 rounded-md border border-gray-300 dark:border-gray-600"
-                  >
+                  <Button onClick={connectWallet} className="w-full bg-primary-DEFAULT hover:bg-primary-dark">
                     Connect Wallet
-                  </button>
+                  </Button>
                 )}
               </div>
-              {status && (
-                <div
-                  role="status"
-                  aria-live="polite"
-                  className="text-xs text-gray-600 text-center"
-                >
-                  {status}
-                </div>
-              )}
+              
+              {status && <p className="text-center text-sm text-text-muted mt-4">{status}</p>}
+
             </CardContent>
           </Card>
         </TabsContent>
         <TabsContent value="optimized">
-          <Card>
+          <Card className="bg-background-paper">
             <CardHeader>
-              <CardTitle>Optimized Swap</CardTitle>
+              <CardTitle className="text-text-primary">Optimized Swap</CardTitle>
             </CardHeader>
             <CardContent>
-              <p>Optimized swap form coming soon.</p>
+              <p className="text-text-secondary">Optimized swap form coming soon.</p>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
     </div>
-  );
-}
-
-function Spinner() {
-  return (
-    <svg
-      className="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500"
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-    >
-      <circle
-        className="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="4"
-      ></circle>
-      <path
-        className="opacity-75"
-        fill="currentColor"
-        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-      ></path>
-    </svg>
   );
 }

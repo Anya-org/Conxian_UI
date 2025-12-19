@@ -19,11 +19,17 @@ export interface Contribution {
   level: string;
 }
 
+export interface TopContributor {
+  address: string;
+  amount: number;
+  level: string;
+}
+
 export interface CommunityStats {
   totalContributors: number;
   totalFunding: number;
   averageContribution: number;
-  topContributors: string[];
+  topContributors: TopContributor[];
 }
 
 export class SelfLaunchContract {
@@ -73,12 +79,16 @@ export class SelfLaunchContract {
     };
   }
 
-  async getCommunityStats() {
+  async getCommunityStats(): Promise<CommunityStats> {
     return {
       totalContributors: 5,
       totalFunding: 150000000,
       averageContribution: 30000000,
-      topContributors: ['ST1...', 'ST2...', 'ST3...']
+      topContributors: [
+        { address: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM', amount: 500, level: 'whale' },
+        { address: 'ST2CY5V39NHDPWSXMW9QDT3HC3PG6QCN9HECYJ979', amount: 250, level: 'dolphin' },
+        { address: 'ST2JHG361ZXG51QTKY2NCQH72JMCJV6M1SGS2Y1C', amount: 100, level: 'fish' }
+      ]
     };
   }
 

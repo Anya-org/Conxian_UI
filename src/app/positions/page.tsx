@@ -1,99 +1,82 @@
+'use client';
 
-"use client";
-
-import { useState, useEffect } from 'react';
-import { CreditCardIcon } from '@heroicons/react/24/outline';
-import { Card } from '@/components/ui/Card';
-import { ContractInteractions } from '@/lib/contract-interactions';
-import { CoreContracts } from '@/lib/contracts';
+import React from 'react';
 import { useWallet } from '@/lib/wallet';
+import { useApi } from '@/lib/api-client';
+import ConnectWallet from '@/components/ConnectWallet';
+
+// Re-styled components
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 
 interface Position {
-  tokenA: string;
-  tokenB: string;
-  share: string;
-  pairContract: string;
+  pair: string;
+  liquidity: number;
+  balance: number;
 }
 
-export default function Positions() {
-  const [positions, setPositions] = useState<Position[]>([]);
+export default function PositionsPage() {
+  const [positions, setPositions] = React.useState<Position[]>([]);
+  const [status, setStatus] = React.useState('');
   const { stxAddress } = useWallet();
+  const api = useApi();
 
-  const handleRemoveLiquidity = async (pairContract: string) => {
-    try {
-      // This is a placeholder for the actual remove liquidity logic
-      alert(`Removing liquidity from ${pairContract}...`);
-      await ContractInteractions.removeLiquidity(pairContract);
-      alert('Liquidity removed successfully!');
-    } catch (error) {
-      console.error(error);
-      alert('Failed to remove liquidity.');
+  React.useEffect(() => {
+    if (stxAddress) {
+      api.getPositions(stxAddress)
+        .then(setPositions)
+        .catch(err => {
+          console.error('Error fetching positions:', err);
+          setStatus('Failed to load positions.');
+        });
     }
-  };
-
-  useEffect(() => {
-    const fetchPositions = async () => {
-      if (stxAddress) {
-        const fetchedPositions: Position[] = [];
-        for (let i = 0; i < CoreContracts.length; i++) {
-          for (let j = i + 1; j < CoreContracts.length; j++) {
-            const pair = await ContractInteractions.getPair(
-              CoreContracts[i].id,
-              CoreContracts[j].id
-            );
-            if (pair.success && pair.result) {
-              const shareResult = await ContractInteractions.getLiquidityProviderShare(
-                pair.result.toString(),
-                stxAddress
-              );
-              if (shareResult.success && shareResult.result) {
-                fetchedPositions.push({
-                  tokenA: CoreContracts[i].name,
-                  tokenB: CoreContracts[j].name,
-                  share: shareResult.result.toString(),
-                  pairContract: pair.result.toString(),
-                });
-              }
-            }
-          }
-        }
-        setPositions(fetchedPositions);
-      }
-    };
-    fetchPositions();
-  }, [stxAddress]);
+  }, [stxAddress, api]);
 
   return (
-    <Card className="p-6">
-      <div className="flex items-center mb-4">
-        <CreditCardIcon className="w-8 h-8 mr-2 text-gray-400" />
-        <h2 className="text-xl font-semibold text-gray-200">My Positions</h2>
-      </div>
-      {positions.length > 0 ? (
-        <ul className="space-y-4">
-          {positions.map((position, index) => (
-            <li key={index} className="p-4 bg-gray-800 rounded-md">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-gray-200">
-                    {position.tokenA} / {position.tokenB}
-                  </p>
-                  <p className="text-sm text-gray-500">Share: {position.share}%</p>
-                </div>
-                <Button
-                  onClick={() => handleRemoveLiquidity(position.pairContract)}
-                  variant="destructive"
-                >
-                  Remove Liquidity
-                </Button>
-              </div>
-            </li>
-          ))}
-        </ul>
+    <div className="min-h-screen w-full p-6 sm:p-10 space-y-8 bg-background-light dark:bg-background-DEFAULT">
+      <header className="flex items-center justify-between mb-10">
+        <h1 className="text-3xl font-bold text-text-primary">My Positions</h1>
+        <div className="lg:hidden">
+          <ConnectWallet />
+        </div>
+      </header>
+
+      {stxAddress ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {positions.length > 0 ? (
+            positions.map((pos, index) => (
+              <Card key={index} className="bg-background-paper">
+                <CardHeader>
+                  <CardTitle className="text-text-primary">{pos.pair}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <p className="text-sm text-text-secondary">Liquidity</p>
+                    <p className="text-lg font-semibold text-text-primary">${pos.liquidity.toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-text-secondary">My Balance</p>
+                    <p className="text-lg font-semibold text-text-primary">${pos.balance.toLocaleString()}</p>
+                  </div>
+                  <div className="flex gap-4 pt-4">
+                    <Button variant="outline" className="w-full">Add</Button>
+                    <Button variant="outline" className="w-full">Remove</Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <p className="text-text-secondary">No positions found.</p>
+          )}
+        </div>
       ) : (
-        <p className="text-center text-gray-500">No positions found.</p>
+        <div className="text-center">
+          <p className="text-text-secondary mb-4">Connect your wallet to see your positions.</p>
+          <ConnectWallet />
+        </div>
       )}
-    </Card>
+
+      {status && <p className="text-center text-sm text-text-muted mt-6">{status}</p>}
+    </div>
   );
 }

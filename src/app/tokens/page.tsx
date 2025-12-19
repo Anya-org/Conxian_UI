@@ -9,6 +9,7 @@ import {
   AddressBalances,
   FungibleTokenBalance,
 } from "@/lib/coreApi";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 
 export default function TokensPage() {
   const [address, setAddress] = React.useState<string>("");
@@ -53,75 +54,87 @@ export default function TokensPage() {
       </header>
 
       {!address && (
-        <div className="rounded-lg border border-gray-700 bg-gray-900 p-4">
-          <p className="text-sm text-gray-400">
-            Connect your wallet to view balances.
-          </p>
-        </div>
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-center text-gray-400">
+              Connect your wallet to view balances.
+            </p>
+          </CardContent>
+        </Card>
       )}
 
       {address && (
         <>
-          <div className="rounded-lg border border-gray-700 bg-gray-900 p-4">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-lg font-semibold text-neutral-light">
-                Wallet
-              </h2>
-              <button
-                onClick={refresh}
-                disabled={loading}
-                className="text-sm px-3 py-1.5 rounded-md border border-gray-600 text-gray-300 hover:bg-gray-800"
-              >
-                {loading ? "Refreshing..." : "Refresh"}
-              </button>
-            </div>
-            <div className="text-sm space-y-1 text-gray-400">
-              <div className="break-all">
-                <span className="font-medium text-gray-300">Address:</span>{" "}
-                {address}
-              </div>
-              <div>
-                <span className="font-medium text-gray-300">STX:</span>{" "}
-                {stx?.balance ?? "—"}
-              </div>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>STX Balance</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-neutral-light">
+                  {stx?.balance ? `${stx.balance} STX` : "—"}
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Your Contribution</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {/* This will be implemented in a future step */}
+                <div className="text-2xl font-bold text-neutral-light">
+                  Coming Soon
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
-          <div className="rounded-lg border border-gray-700 bg-gray-900 p-4">
-            <h2 className="text-lg font-semibold mb-3 text-neutral-light">
-              Fungible Tokens
-            </h2>
-            <div className="overflow-auto">
-              <table className="w-full text-sm text-left">
-                <thead>
-                  <tr className="border-b border-gray-700 text-gray-300">
-                    <th className="py-2 pr-4">Asset</th>
-                    <th className="py-2 pr-4">Balance</th>
-                  </tr>
-                </thead>
-                <tbody className="text-gray-400">
-                  {fts.map((t: FungibleTokenBalance) => (
-                    <tr
-                      key={t.asset_identifier}
-                      className="border-b border-gray-800 hover:bg-gray-800"
-                    >
-                      <td className="py-2 pr-4 break-all">
-                        {t.asset_identifier}
-                      </td>
-                      <td className="py-2 pr-4">{t.balance}</td>
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Fungible Tokens</CardTitle>
+                <button
+                  onClick={refresh}
+                  disabled={loading}
+                  className="text-sm px-3 py-1.5 rounded-md border border-gray-600 text-gray-300 hover:bg-gray-800"
+                >
+                  {loading ? "Refreshing..." : "Refresh"}
+                </button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-auto">
+                <table className="w-full text-sm text-left">
+                  <thead>
+                    <tr className="border-b border-gray-700 text-gray-300">
+                      <th className="py-2 pr-4">Asset</th>
+                      <th className="py-2 pr-4">Balance</th>
                     </tr>
-                  ))}
-                  {fts.length === 0 && (
-                    <tr>
-                      <td className="py-4 text-center" colSpan={2}>
-                        No fungible tokens found.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                  </thead>
+                  <tbody className="text-gray-400">
+                    {fts.map((t: FungibleTokenBalance) => (
+                      <tr
+                        key={t.asset_identifier}
+                        className="border-b border-gray-800 hover:bg-gray-800"
+                      >
+                        <td className="py-2 pr-4 break-all">
+                          {t.asset_identifier}
+                        </td>
+                        <td className="py-2 pr-4">{t.balance}</td>
+                      </tr>
+                    ))}
+                    {fts.length === 0 && (
+                      <tr>
+                        <td className="py-4 text-center" colSpan={2}>
+                          No fungible tokens found.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
         </>
       )}
     </div>

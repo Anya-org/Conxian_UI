@@ -1,49 +1,45 @@
+export const CoreContracts = [
+  // Monitoring & Security
+  { id: 'ST123.health-check', kind: 'monitoring', label: 'Health Check' },
+  { id: 'ST123.oracle-aggregator-v1', kind: 'oracle', label: 'Oracle V1' },
+  { id: 'ST123.oracle-aggregator-v2', kind: 'oracle', label: 'Oracle V2' },
+  { id: 'ST123.circuit-breaker', kind: 'security', label: 'Circuit Breaker' },
+  { id: 'ST123.auditor', kind: 'security', label: 'Auditor' },
 
-import base from './generated/base.json' with { type: 'json' };
+  // DEX & AMM
+  { id: 'ST123.dex-factory', kind: 'dex', label: 'DEX Factory' },
+  { id: 'ST123.liquidity-pool', kind: 'dex', label: 'Liquidity Pool' },
+  { id: 'ST123.router', kind: 'dex', label: 'Router' },
+  { id: 'ST123.amm', kind: 'dex', label: 'AMM' },
 
-export type ContractRef = {
-  id: string; // principal.contract-name
-  label: string;
-  kind: 'token' | 'dex' | 'oracle' | 'security' | 'enterprise' | 'rewards' | 'other' | 'monitoring';
-  decimals?: number;
-};
+  // Tokens & Vault
+  { id: 'ST123.token-a', kind: 'token', label: 'Token A', decimals: 6 },
+  { id: 'ST123.token-b', kind: 'token', label: 'Token B', decimals: 6 },
+  { id: 'ST123.sbtc', kind: 'token', label: 'sBTC', decimals: 8 },
+  { id: 'ST123.vault', kind: 'vault', label: 'Vault' },
 
-const BASE = (base && typeof base.basePrincipal === 'string' && base.basePrincipal) || 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6';
+  // Staking & Governance
+  { id: 'ST123.staking', kind: 'governance', label: 'Staking' },
+  { id: 'ST123.governance-token', kind: 'governance', label: 'Governance Token', decimals: 6 },
+  { id: 'ST123.rewards', kind: 'rewards', label: 'Rewards' },
 
-export const Tokens: ContractRef[] = [
-  { id: `${BASE}.cxd-token`, label: 'CXD Token', kind: 'token', decimals: 6 },
-  { id: `${BASE}.cxvg-token`, label: 'CXVG Token', kind: 'token', decimals: 6 },
-  { id: `${BASE}.cxtr-token`, label: 'CXTR Token', kind: 'token', decimals: 6 },
-  { id: `${BASE}.cxs-token`, label: 'CXS Token', kind: 'token', decimals: 6 },
+  // Others
+  { id: 'ST123.bond-factory', kind: 'vault', label: 'Bond Factory' },
+  { id: 'ST123.flash-loan', kind: 'dex', label: 'Flash Loan' },
+  { id: 'ST123.performance-recommender', kind: 'monitoring', label: 'Performance Recommender' },
+  { id: 'ST123.metrics-aggregator', kind: 'monitoring', label: 'Metrics Aggregator' },
+  { id: 'ST123.financial-metrics', kind: 'monitoring', label: 'Financial Metrics' },
+  { id: 'ST123.enterprise-config', kind: 'governance', label: 'Enterprise Config' },
+  { id: 'ST123.yield-optimizer', kind: 'vault', label: 'Yield Optimizer' },
 ];
 
-export const CoreContracts: ContractRef[] = [
-  { id: `${BASE}.concentrated-liquidity-pool`, label: 'Concentrated Pool', kind: 'dex' },
-  { id: `${BASE}.dex-factory-v2`, label: 'DEX Factory', kind: 'dex' },
-  { id: `${BASE}.dex-router`, label: 'DEX Router', kind: 'dex' },
-  { id: `${BASE}.multi-hop-router-v3`, label: 'Router V3', kind: 'dex' },
-  { id: `${BASE}.vault`, label: 'Vault', kind: 'dex' },
-  { id: `${BASE}.bond-factory`, label: 'Bond Factory', kind: 'dex' },
-  { id: `${BASE}.oracle-aggregator-v2`, label: 'Oracle Aggregator v2', kind: 'oracle' },
-  { id: `${BASE}.circuit-breaker`, label: 'Circuit Breaker', kind: 'security' },
-  { id: `${BASE}.cxd-staking`, label: 'CXD Staking', kind: 'rewards' },
-  { id: `${BASE}.distributed-cache-manager`, label: 'Cache Manager', kind: 'other' },
-  { id: `${BASE}.flash-loan-vault`, label: 'Flash Loan Vault', kind: 'dex' },
-  { id: `${BASE}.sbtc-vault`, label: 'sBTC Vault', kind: 'dex' },
-  { id: `${BASE}.audit-registry`, label: 'Audit Registry', kind: 'security' },
-  { id: `${BASE}.governance-signature-verifier`, label: 'Governance Verifier', kind: 'other' },
-  { id: `${BASE}.system-monitor`, label: 'System Monitor', kind: 'monitoring' },
-  { id: `${BASE}.enterprise-api`, label: 'Enterprise API', kind: 'enterprise' },
-  { id: `${BASE}.yield-optimizer`, label: 'Yield Optimizer', kind: 'rewards' },
-  { id: `${BASE}.analytics-aggregator`, label: 'Analytics Aggregator', kind: 'monitoring' },
-  { id: `${BASE}.performance-optimizer`, label: 'Performance Optimizer', kind: 'monitoring' },
-  { id: `${BASE}.finance-metrics`, label: 'Finance Metrics', kind: 'monitoring' },
-  { id: `${BASE}.monitoring-dashboard`, label: 'Monitoring Dashboard', kind: 'monitoring' },
-  { id: `${BASE}.shielded-wallet-manager`, label: 'Shielded Wallet Manager', kind: 'security' },
-];
+export const Tokens = CoreContracts.filter(c => c.kind === 'token');
 
-export function explorerContractUrl(contractId: string, network: 'devnet' | 'testnet' | 'mainnet' = 'testnet') {
-  // Map devnet to 'devnet' param (Explorer may show local-only if configured). Fallback to testnet visually if needed.
-  const chain = network;
-  return `https://explorer.hiro.so/contract/${contractId}?chain=${chain}`;
+export function explorerContractUrl(
+  contractId: string,
+  network: "devnet" | "testnet" | "mainnet"
+): string {
+  const baseUrl = `https://explorer.stacks.co/txid/${contractId}`;
+  const params = network === "mainnet" ? "?chain=mainnet" : `?chain=testnet`;
+  return baseUrl + params;
 }

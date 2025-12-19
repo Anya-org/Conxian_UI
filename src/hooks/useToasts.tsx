@@ -11,17 +11,17 @@ interface ToastData {
 export const useToasts = () => {
   const [toasts, setToasts] = useState<ToastData[]>([]);
 
+  const removeToast = useCallback((id: number) => {
+    setToasts((prevToasts) => prevToasts.filter((toast) => toast.id !== id));
+  }, []);
+
   const addToast = useCallback((message: string, type: ToastType) => {
     const id = Date.now();
     setToasts((prevToasts) => [...prevToasts, { id, message, type }]);
     setTimeout(() => {
       removeToast(id);
     }, 5000);
-  }, []);
-
-  const removeToast = useCallback((id: number) => {
-    setToasts((prevToasts) => prevToasts.filter((toast) => toast.id !== id));
-  }, []);
+  }, [removeToast]);
 
   const ToastContainer = () => (
     <div className="fixed top-5 right-5 z-50">

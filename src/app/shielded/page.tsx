@@ -1,11 +1,10 @@
+'use client';
 
-"use client";
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ShieldCheckIcon, PlusCircleIcon, ArrowUpCircleIcon, ArrowDownCircleIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { ShieldedWalletService } from '@/lib/shielded-wallet';
+import { useApi } from '@/lib/api-client';
 import { useWallet } from '@/lib/wallet';
 import { Input } from '@/components/ui/Input';
 
@@ -20,28 +19,19 @@ export default function Shielded() {
   const [recipient, setRecipient] = useState('');
   const [receiveAmount, setReceiveAmount] = useState('');
   const { stxAddress, addToast } = useWallet();
+  const api = useApi();
 
-  const handleCreateWallet = async () => {
-    if (!stxAddress) return;
-    try {
-      await ShieldedWalletService.createNewWallet();
-      addToast('New shielded wallet created! Fetching updated list...', 'success');
-      fetchWallets();
-    } catch (error) {
-      console.error(error);
-      addToast('Failed to create shielded wallet.', 'error');
-    }
-  };
-
-  const fetchWallets = async () => {
+  const fetchWallets = useCallback(async () => {
     if (stxAddress) {
-      const result = await ShieldedWalletService.fetchUserWallets(stxAddress);
+      const result = await api.fetchUserWallets(stxAddress);
       if (result.success && result.result) {
-        // Assuming result.result is a list of wallet IDs
-        const walletIds = (result.result as any).value.map((v: any) => v.value);
+        // Assuming result.result is a Clarity list value
+        const walletIds = (result.result as { value: { value: string }[] }).value.map(
+          (v) => v.value
+        );
         const walletDetails = await Promise.all(
           walletIds.map(async (id: string) => {
-            const balanceResult = await ShieldedWalletService.fetchWalletBalance(id);
+            const balanceResult = await api.fetchWalletBalance(id);
             return {
               id,
               balance: balanceResult.success && balanceResult.result ? balanceResult.result.toString() : '0',
@@ -51,6 +41,18 @@ export default function Shielded() {
         setWallets(walletDetails);
       }
     }
+  }, [stxAddress, api]);
+
+  const handleCreateWallet = async () => {
+    if (!stxAddress) return;
+    try {
+      await api.createNewWallet();
+      addToast('New shielded wallet created! Fetching updated list...', 'success');
+      fetchWallets();
+    } catch (error) {
+      console.error(error);
+      addToast('Failed to create shielded wallet.', 'error');
+    }
   };
 
   const handleSendFunds = async (walletId: string) => {
@@ -59,7 +61,7 @@ export default function Shielded() {
       return;
     }
     try {
-      await ShieldedWalletService.sendFunds(walletId, recipient, parseInt(sendAmount, 10));
+      await api.sendFunds(walletId, recipient, parseInt(sendAmount, 10));
       addToast('Funds sent successfully!', 'success');
       fetchWallets(); // Refresh balances
     } catch (error) {
@@ -74,7 +76,7 @@ export default function Shielded() {
       return;
     }
     try {
-      await ShieldedWalletService.receiveFunds(walletId, parseInt(receiveAmount, 10));
+      await api.receiveFunds(walletId, parseInt(receiveAmount, 10));
       addToast('Funds received successfully!', 'success');
       fetchWallets(); // Refresh balances
     } catch (error) {
@@ -85,10 +87,8 @@ export default function Shielded() {
 
 
   useEffect(() => {
-    if (stxAddress) {
-      fetchWallets();
-    }
-  }, [stxAddress]);
+    fetchWallets();
+  }, [fetchWallets]);
 
   return (
     <Card className="p-6">
@@ -97,7 +97,7 @@ export default function Shielded() {
           <ShieldCheckIcon className="w-8 h-8 mr-2 text-gray-400" />
           <h2 className="text-xl font-semibold text-gray-200">Shielded Wallets</h2>
         </div>
-        <Button onClick={handleCreateWallet} variant="secondary">
+        <Button onClick={handleCreateWallet} variant="outline">
           <PlusCircleIcon className="w-5 h-5 mr-2" />
           Create Wallet
         </Button>

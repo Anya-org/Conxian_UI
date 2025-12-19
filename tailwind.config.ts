@@ -10,33 +10,28 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Conxian Brand Palette
+        // Conxian 'Earthy Finance' Brand Palette - Refined
         primary: {
-          DEFAULT: "#5546FF", // Hero purple (from docs/images)
-          dark: "#3E31CC",
-          light: "#7B6EFF"
+          DEFAULT: "#C0A060", // A more refined, less saturated gold
+          dark: "#A08040",    // A darker, richer gold
+          light: "#E0C080"   // A lighter, softer gold
         },
         background: {
-          DEFAULT: "#0F1117", // Dark background (from docs/images)
-          paper: "#1E2029",   // Card/Surface background
-          darker: "#090A0E"   // Sidebar/Header background
+          DEFAULT: "#181A1B", // A very dark, near-black for high contrast
+          paper: "#242627",   // A slightly lighter dark gray for surfaces
+          light: "#F5F5F5"    // A soft, off-white for light mode
         },
         text: {
-          primary: "#FFFFFF",
-          secondary: "#9CA3AF", // Gray-400 equivalent
-          muted: "#6B7280"      // Gray-500 equivalent
+          primary: "#E8E6E3",   // A slightly off-white for better readability
+          secondary: "#A0A0A0", // A calm, neutral gray
+          muted: "#606060"     // A darker gray for less important text
         },
         accent: {
-           success: "#10B981", // Green
-           warning: "#F59E0B", // Amber
-           error: "#EF4444",   // Red
-           info: "#3B82F6"     // Blue
+           success: "#2E8B57", // A more natural green
+           warning: "#D97706", // A richer, more amber-like color
+           error: "#B91C1C",   // A deep, less alarming red
+           info: "#2563EB"     // A standard, accessible blue
         },
-        // Keeping legacy for compatibility but mapping to new scheme where possible
-        "primary-dark": "#3E31CC",
-        "neutral-light": "#F5F5F5",
-        "neutral-medium": "#E0E0E0",
-        "neutral-dark": "#333333",
       },
       fontFamily: {
         sans: ["var(--font-inter)"],

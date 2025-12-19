@@ -1,125 +1,138 @@
+'use client';
 
-"use client";
-
-import { useState, useEffect } from 'react';
-import { PlusCircleIcon } from '@heroicons/react/24/outline';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { ContractInteractions } from '@/lib/contract-interactions';
-import { CoreContracts } from '@/lib/contracts';
+import React from 'react';
+import { Tokens } from '@/lib/contracts';
 import { useWallet } from '@/lib/wallet';
+import ConnectWallet from '@/components/ConnectWallet';
+import { IntentManager } from '@/lib/intent-manager';
 
-export default function AddLiquidity() {
-  const [tokenA, setTokenA] = useState('');
-  const [tokenB, setTokenB] = useState('');
-  const [amountA, setAmountA] = useState('');
-  const [amountB, setAmountB] = useState('');
-  const [balanceA, setBalanceA] = useState<string | null>(null);
-  const [balanceB, setBalanceB] = useState<string | null>(null);
-  const { stxAddress } = useWallet();
+// Re-styled components
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+
+const intentManager = new IntentManager();
+
+export default function AddLiquidityPage() {
+  const [tokenA, setTokenA] = React.useState(Tokens[0].id);
+  const [tokenB, setTokenB] = React.useState(Tokens[1].id);
+  const [amountA, setAmountA] = React.useState('100');
+  const [amountB, setAmountB] = React.useState('200');
+  const [status, setStatus] = React.useState('');
+  const [sending, setSending] = React.useState(false);
+  const { connectWallet, stxAddress } = useWallet();
 
   const handleAddLiquidity = async () => {
-    if (!tokenA || !tokenB) {
-      alert('Please select two tokens.');
+    if (!stxAddress) {
+      setStatus('Please connect wallet to add liquidity');
       return;
     }
+    if (!tokenA || !tokenB || !amountA || !amountB) {
+      setStatus('Please fill in all fields');
+      return;
+    }
+
+    setSending(true);
+    setStatus('');
+
     try {
-      await ContractInteractions.createPair(tokenA, tokenB);
-      alert('Liquidity added successfully!');
-    } catch (error) {
-      console.error(error);
-      alert('Failed to add liquidity.');
+      const result = await intentManager.execute({
+        type: 'invest-pool',
+        tokenA: tokenA,
+        tokenB: tokenB,
+        amountA: parseFloat(amountA),
+        amountB: parseFloat(amountB),
+      });
+      setStatus(`Liquidity added. Tx ID: ${result.txId}`);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setStatus(`Error: ${msg}`);
+    } finally {
+      setSending(false);
     }
   };
 
-  useEffect(() => {
-    const fetchBalances = async () => {
-      if (stxAddress && tokenA) {
-        const balance = await ContractInteractions.getTokenBalance(tokenA, stxAddress);
-        setBalanceA(balance.result?.toString() ?? '0');
-      }
-      if (stxAddress && tokenB) {
-        const balance = await ContractInteractions.getTokenBalance(tokenB, stxAddress);
-        setBalanceB(balance.result?.toString() ?? '0');
-      }
-    };
-    fetchBalances();
-  }, [stxAddress, tokenA, tokenB]);
-
-
   return (
-    <Card className="p-6">
-      <div className="flex items-center mb-4">
-        <PlusCircleIcon className="w-8 h-8 mr-2 text-gray-400" />
-        <h2 className="text-xl font-semibold text-gray-200">Add Liquidity</h2>
-      </div>
-      <div className="space-y-4">
-        <div>
-          <label htmlFor="tokenA" className="block text-sm font-medium text-gray-300">
-            Token A
-          </label>
-          <select
-            id="tokenA"
-            value={tokenA}
-            onChange={(e) => setTokenA(e.target.value)}
-            className="block w-full px-3 py-2 mt-1 text-gray-200 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-          >
-            <option value="">Select Token</option>
-            {CoreContracts.map((contract) => (
-              <option key={contract.id} value={contract.id}>
-                {contract.name}
-              </option>
-            ))}
-          </select>
-          {balanceA && <p className="mt-1 text-sm text-gray-500">Balance: {balanceA}</p>}
+    <div className="min-h-screen w-full p-6 sm:p-10 space-y-8 bg-background-light dark:bg-background-DEFAULT">
+      <header className="flex items-center justify-between mb-10">
+        <h1 className="text-3xl font-bold text-text-primary">Add Liquidity</h1>
+        <div className="lg:hidden">
+          <ConnectWallet />
         </div>
-        <div>
-          <label htmlFor="amountA" className="block text-sm font-medium text-gray-300">
-            Amount A
-          </label>
-          <input
-            type="text"
-            id="amountA"
-            value={amountA}
-            onChange={(e) => setAmountA(e.target.value)}
-            className="block w-full px-3 py-2 mt-1 text-gray-200 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-          />
-        </div>
-        <div>
-          <label htmlFor="tokenB" className="block text-sm font-medium text-gray-300">
-            Token B
-          </label>
-          <select
-            id="tokenB"
-            value={tokenB}
-            onChange={(e) => setTokenB(e.target.value)}
-            className="block w-full px-3 py-2 mt-1 text-gray-200 bg-gray-800 border border-gray-700 rounded-.md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-          >
-            <option value="">Select Token</option>
-            {CoreContracts.map((contract) => (
-              <option key={contract.id} value={contract.id}>
-                {contract.name}
-              </option>
-            ))}
-          </select>
-          {balanceB && <p className="mt-1 text-sm text-gray-500">Balance: {balanceB}</p>}
-        </div>
-        <div>
-          <label htmlFor="amountB" className="block text-sm font-medium text-gray-300">
-            Amount B
-          </label>
-          <input
-            type="text"
-            id="amountB"
-            value={amountB}
-            onChange={(e) => setAmountB(e.target.value)}
-            className="block w-full px-3 py-2 mt-1 text-gray-200 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-          />
-        </div>
-      </div>
-      <Button onClick={handleAddLiquidity} className="w-full mt-6">
-        Add Liquidity
-      </Button>
-    </Card>
+      </header>
+
+      <Card className="w-full max-w-md mx-auto bg-background-paper">
+        <CardHeader>
+          <CardTitle className="text-text-primary">Add Liquidity</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Token A */}
+          <div className="space-y-2">
+            <label htmlFor="token-a" className="text-sm text-text-secondary">Token A</label>
+            <div className="flex items-center gap-2">
+              <select
+                id="token-a"
+                value={tokenA}
+                onChange={(e) => setTokenA(e.target.value)}
+                className="w-full rounded-md border-gray-600 bg-background-paper text-text-primary py-2 px-3"
+              >
+                {Tokens.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
+              </select>
+              <Input
+                type="number"
+                id="amount-a"
+                value={amountA}
+                onChange={(e) => setAmountA(e.target.value)}
+                className="w-full text-right"
+                placeholder="0.0"
+              />
+            </div>
+          </div>
+
+          {/* Token B */}
+          <div className="space-y-2">
+            <label htmlFor="token-b" className="text-sm text-text-secondary">Token B</label>
+            <div className="flex items-center gap-2">
+              <select
+                id="token-b"
+                value={tokenB}
+                onChange={(e) => setTokenB(e.target.value)}
+                className="w-full rounded-md border-gray-600 bg-background-paper text-text-primary py-2 px-3"
+              >
+                {Tokens.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
+              </select>
+              <Input
+                type="number"
+                id="amount-b"
+                value={amountB}
+                onChange={(e) => setAmountB(e.target.value)}
+                className="w-full text-right"
+                placeholder="0.0"
+              />
+            </div>
+          </div>
+
+          {/* Action Button */}
+          <div className="pt-4">
+            {stxAddress ? (
+              <Button
+                onClick={handleAddLiquidity}
+                disabled={sending}
+                className="w-full bg-primary-DEFAULT hover:bg-primary-dark text-white"
+              >
+                {sending ? 'Adding...' : 'Add Liquidity'}
+              </Button>
+            ) : (
+              <Button onClick={connectWallet} className="w-full bg-primary-DEFAULT hover:bg-primary-dark">
+                Connect Wallet
+              </Button>
+            )}
+          </div>
+          
+          {status && <p className="text-center text-sm text-text-muted mt-4">{status}</p>}
+
+        </CardContent>
+      </Card>
+    </div>
   );
 }
