@@ -36,8 +36,8 @@ export default function InvestPage() {
   return (
     <div>
       <ToastContainer />
-      <h1 className="text-2xl font-bold mb-4">Invest in Liquidity Pool</h1>
-      <p className="mb-4">
+      <h1 className="text-2xl font-bold mb-4 text-text">Invest in Liquidity Pool</h1>
+      <p className="mb-4 text-text/80">
         Invest your tokens in our liquidity pools to earn rewards.
       </p>
       <div className="flex flex-col space-y-4">
@@ -46,11 +46,11 @@ export default function InvestPage() {
           placeholder="Amount to invest"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          className="border p-2 rounded"
+          className="border border-accent/20 p-2 rounded bg-paper text-text"
         />
         <button
           onClick={handleInvest}
-          className="bg-blue-500 text-white p-2 rounded"
+          className="bg-primary text-light p-2 rounded hover:bg-primary/90"
         >
           Invest
         </button>

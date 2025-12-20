@@ -1,20 +1,35 @@
 
-import { render, screen, act, within } from '@testing-library/react';
+import { render, screen, act, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import ConnectWallet from '@/components/ConnectWallet';
 import LaunchPage from '@/app/launch/page';
-import { WalletProvider } from '@/lib/wallet';
-import { useApi } from '@/lib/api-client';
+import { WalletProvider, useWallet } from '@/lib/wallet';
+import { ApiService } from '@/lib/api-services';
 
-// Mock the useApi hook
-vi.mock('@/lib/api-client', () => ({
-  useApi: vi.fn().mockReturnValue({
+// Mock the ApiService
+vi.mock('@/lib/api-services', () => ({
+  ApiService: {
     getDashboardMetrics: vi.fn().mockResolvedValue({
       systemHealth: { success: true, result: 'OK' },
     }),
-  }),
+  },
 }));
+
+// Mock the useWallet hook
+const mockAddToast = vi.fn();
+vi.mock('@/lib/wallet', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...(actual as any),
+    useWallet: vi.fn().mockReturnValue({
+      stxAddress: null,
+      connectWallet: vi.fn(),
+      addToast: mockAddToast,
+      hasConfirmedAddress: true, // Simulate wallet is installed
+    }),
+  };
+});
 
 // Mock the useSelfLaunch hook
 vi.mock('@/lib/hooks/use-self-launch', () => ({
@@ -42,10 +57,10 @@ describe('UI Components', () => {
         <ConnectWallet />
       </WalletProvider>
     );
-    expect(screen.getByText('Connect Wallet')).toBeInTheDocument();
+    expect(screen.getByTestId('connect-wallet-button')).toBeInTheDocument();
   });
 
-  it('should render the LaunchPage and show the connect wallet button', async () => {
+  it('should render the LaunchPage and show a toast when contributing without a wallet', async () => {
     render(
       <WalletProvider>
         <LaunchPage />
@@ -69,16 +84,15 @@ describe('UI Components', () => {
     });
 
     // Check for the toast message
-    expect(
-      await screen.findByText('Please connect your wallet to contribute.')
-    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(mockAddToast).toHaveBeenCalledWith(expect.stringContaining('Please connect your wallet to contribute'));
+    });
   });
 
   it('should call the API when a button is clicked', async () => {
-    const mockApi = useApi();
     render(
       <WalletProvider>
-        <button onClick={() => mockApi.getDashboardMetrics()}>
+        <button onClick={() => ApiService.getDashboardMetrics()}>
           Refresh Metrics
         </button>
       </WalletProvider>
@@ -86,6 +100,6 @@ describe('UI Components', () => {
     await act(async () => {
       await userEvent.click(screen.getByText('Refresh Metrics'));
     });
-    expect(mockApi.getDashboardMetrics).toHaveBeenCalled();
+    expect(ApiService.getDashboardMetrics).toHaveBeenCalled();
   });
 });

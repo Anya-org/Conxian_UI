@@ -1,10 +1,8 @@
-
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
-import ThemeManager from "@/components/ThemeManager";
 import { Providers } from "./providers";
 
 const inter = Inter({
@@ -23,14 +21,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark h-full bg-gray-900">
+    <html lang="en" className="h-full bg-background">
       <head>
         <link rel="icon" href="/logo.jpg" />
       </head>
       <body
-        className={`${inter.variable} font-sans h-full antialiased text-gray-300`}
+        className={`${inter.variable} font-sans h-full antialiased text-text`}
       >
-        <ThemeManager />
         <Providers>
           <div>
             <Sidebar />

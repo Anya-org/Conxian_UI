@@ -53,28 +53,28 @@ export default function AddLiquidityPage() {
   };
 
   return (
-    <div className="min-h-screen w-full p-6 sm:p-10 space-y-8 bg-background-light dark:bg-background-DEFAULT">
+    <div className="min-h-screen w-full p-6 sm:p-10 space-y-8 bg-background">
       <header className="flex items-center justify-between mb-10">
-        <h1 className="text-3xl font-bold text-text-primary">Add Liquidity</h1>
+        <h1 className="text-3xl font-bold text-text">Add Liquidity</h1>
         <div className="lg:hidden">
           <ConnectWallet />
         </div>
       </header>
 
-      <Card className="w-full max-w-md mx-auto bg-background-paper">
+      <Card className="w-full max-w-md mx-auto bg-paper">
         <CardHeader>
-          <CardTitle className="text-text-primary">Add Liquidity</CardTitle>
+          <CardTitle className="text-text">Add Liquidity</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Token A */}
           <div className="space-y-2">
-            <label htmlFor="token-a" className="text-sm text-text-secondary">Token A</label>
+            <label htmlFor="token-a" className="text-sm text-text/80">Token A</label>
             <div className="flex items-center gap-2">
               <select
                 id="token-a"
                 value={tokenA}
                 onChange={(e) => setTokenA(e.target.value)}
-                className="w-full rounded-md border-gray-600 bg-background-paper text-text-primary py-2 px-3"
+                className="w-full rounded-md border-accent/20 bg-paper text-text py-2 px-3"
               >
                 {Tokens.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
               </select>
@@ -91,13 +91,13 @@ export default function AddLiquidityPage() {
 
           {/* Token B */}
           <div className="space-y-2">
-            <label htmlFor="token-b" className="text-sm text-text-secondary">Token B</label>
+            <label htmlFor="token-b" className="text-sm text-text/80">Token B</label>
             <div className="flex items-center gap-2">
               <select
                 id="token-b"
                 value={tokenB}
                 onChange={(e) => setTokenB(e.target.value)}
-                className="w-full rounded-md border-gray-600 bg-background-paper text-text-primary py-2 px-3"
+                className="w-full rounded-md border-accent/20 bg-paper text-text py-2 px-3"
               >
                 {Tokens.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
               </select>
@@ -118,18 +118,18 @@ export default function AddLiquidityPage() {
               <Button
                 onClick={handleAddLiquidity}
                 disabled={sending}
-                className="w-full bg-primary-DEFAULT hover:bg-primary-dark text-white"
+                className="w-full bg-primary hover:bg-primary/90 text-light"
               >
                 {sending ? 'Adding...' : 'Add Liquidity'}
               </Button>
             ) : (
-              <Button onClick={connectWallet} className="w-full bg-primary-DEFAULT hover:bg-primary-dark">
+              <Button onClick={connectWallet} className="w-full bg-primary hover:bg-primary/90 text-light">
                 Connect Wallet
               </Button>
             )}
           </div>
           
-          {status && <p className="text-center text-sm text-text-muted mt-4">{status}</p>}
+          {status && <p className="text-center text-sm text-text/80 mt-4">{status}</p>}
 
         </CardContent>
       </Card>

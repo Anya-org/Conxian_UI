@@ -17,8 +17,8 @@ export default function Home() {
   return (
     <>
       <div>
-        <h1 className="text-3xl font-bold text-white">Dashboard</h1>
-        <p className="mt-2 text-sm text-gray-400">
+        <h1 className="text-3xl font-bold text-text">Dashboard</h1>
+        <p className="mt-2 text-sm text-text/80">
           An overview of the Conxian ecosystem.
         </p>
       </div>
@@ -32,19 +32,19 @@ export default function Home() {
           <StatCard
             title="TVL"
             value="$0"
-            icon={<CurrencyDollarIcon className="w-5 h-5 text-gray-400" />}
+            icon={<CurrencyDollarIcon className="w-5 h-5 text-text/80" />}
             subtext="Across Conxian protocols"
           />
           <StatCard
             title="Active Vaults"
             value="0"
-            icon={<ShieldCheckIcon className="w-5 h-5 text-gray-400" />}
+            icon={<ShieldCheckIcon className="w-5 h-5 text-text/80" />}
             subtext="Configured & healthy"
           />
           <StatCard
             title="APY (Median)"
             value="0%"
-            icon={<ArrowTrendingUpIcon className="w-5 h-5 text-gray-400" />}
+            icon={<ArrowTrendingUpIcon className="w-5 h-5 text-text/80" />}
             subtext="Benchmarks pending"
           />
         </section>
@@ -55,12 +55,12 @@ export default function Home() {
               <CardTitle>Vaults</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-3 gap-4 text-sm text-gray-500 font-medium">
+              <div className="grid grid-cols-3 gap-4 text-sm text-text/80 font-medium">
                 <div>Name</div>
                 <div>Asset</div>
                 <div className="text-right">APY</div>
               </div>
-              <div className="mt-4 text-sm text-gray-500">
+              <div className="mt-4 text-sm text-text/80">
                 No vaults available yet.
               </div>
             </CardContent>
@@ -70,13 +70,13 @@ export default function Home() {
               <CardTitle>Staking</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-6">
-              <div className="rounded-lg bg-gray-800 p-4">
-                <div className="text-sm text-gray-500 mb-2">Total Staked</div>
-                <div className="text-xl font-bold text-white">$0</div>
+              <div className="rounded-lg bg-background p-4">
+                <div className="text-sm text-text/80 mb-2">Total Staked</div>
+                <div className="text-xl font-bold text-text">$0</div>
               </div>
-              <div className="rounded-lg bg-gray-800 p-4">
-                <div className="text-sm text-gray-500 mb-2">My Staked</div>
-                <div className="text-xl font-bold text-white">$0</div>
+              <div className="rounded-lg bg-background p-4">
+                <div className="text-sm text-text/80 mb-2">My Staked</div>
+                <div className="text-xl font-bold text-text">$0</div>
               </div>
             </CardContent>
           </Card>
@@ -88,7 +88,7 @@ export default function Home() {
               <CardTitle>Benchmarks</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-text/80">
                 Compare against top DeFi, CeFi, banks, and enterprise finance.
                 KPIs: APY, spread, slippage, uptime, latency.
               </p>

@@ -74,10 +74,10 @@ export default function LaunchPage() {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="text-center">
-        <h1 className="text-4xl font-bold mb-2 text-neutral-light">
+        <h1 className="text-4xl font-bold mb-2 text-text">
           Conxian Community Launch
         </h1>
-        <p className="text-xl text-gray-400">
+        <p className="text-xl text-text/80">
           Help bootstrap the future of DeFi through community funding
         </p>
       </div>
@@ -89,7 +89,7 @@ export default function LaunchPage() {
       )}
 
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4 bg-gray-900 border border-gray-700">
+        <TabsList className="grid w-full grid-cols-4 bg-background border border-accent/20">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="contribute">Contribute</TabsTrigger>
           <TabsTrigger value="progress">Progress</TabsTrigger>
@@ -103,10 +103,10 @@ export default function LaunchPage() {
                 <CardTitle>Current Phase</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-neutral-light">
+                <div className="text-2xl font-bold text-text">
                   {currentPhase?.name || 'N/A'}
                 </div>
-                <p className="text-gray-400">Core infrastructure deployment</p>
+                <p className="text-text/80">Core infrastructure deployment</p>
               </CardContent>
             </Card>
 
@@ -115,10 +115,10 @@ export default function LaunchPage() {
                 <CardTitle>Total Raised</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-neutral-light">
+                <div className="text-2xl font-bold text-text">
                   {fundingProgress.current} STX
                 </div>
-                <p className="text-gray-400">Community contributions</p>
+                <p className="text-text/80">Community contributions</p>
               </CardContent>
             </Card>
 
@@ -127,10 +127,10 @@ export default function LaunchPage() {
                 <CardTitle>Contributors</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-neutral-light">
+                <div className="text-2xl font-bold text-text">
                   {communityStats?.totalContributors || 0}
                 </div>
-                <p className="text-gray-400">Active community members</p>
+                <p className="text-text/80">Active community members</p>
               </CardContent>
             </Card>
           </div>
@@ -146,7 +146,7 @@ export default function LaunchPage() {
               {phases.map((phase) => (
                 <div key={phase.id} className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="font-medium text-gray-300">
+                    <span className="font-medium text-text">
                       {phase.name}
                     </span>
                     <Badge
@@ -163,9 +163,9 @@ export default function LaunchPage() {
                   </div>
                   <Progress
                     value={(phase.funding / phase.target) * 100}
-                    className="h-2 bg-gray-700"
+                    className="h-2 bg-accent/20"
                   />
-                  <div className="flex justify-between text-sm text-gray-400">
+                  <div className="flex justify-between text-sm text-text/80">
                     <span>
                       {phase.funding} / {phase.target} STX
                     </span>
@@ -198,7 +198,7 @@ export default function LaunchPage() {
                   Contribute
                 </Button>
               </div>
-              <div className="text-sm text-gray-400">
+              <div className="text-sm text-text/80">
                 Your contribution: {userContribution.total || 0} STX
               </div>
             </CardContent>
@@ -216,22 +216,22 @@ export default function LaunchPage() {
             <CardContent>
               <div className="space-y-3">
                 {!communityStats?.topContributors || communityStats.topContributors.length === 0 ? (
-                  <p className="text-center text-gray-400 py-8">
+                  <p className="text-center text-text/80 py-8">
                     No contributions yet. Be the first!
                   </p>
                 ) : (
                   communityStats.topContributors.map((contrib, index) => (
                     <div
                       key={index}
-                      className="flex justify-between items-center p-3 border border-gray-700 rounded bg-gray-800"
+                      className="flex justify-between items-center p-3 border border-accent/20 rounded bg-paper"
                     >
                       <div>
-                        <div className="font-medium text-gray-300">
+                        <div className="font-medium text-text">
                           {contrib.address.substring(0, 8)}...
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-medium text-gray-300">
+                        <div className="font-medium text-text">
                           {contrib.amount} STX
                         </div>
                         <Badge variant="outline" className="text-xs">

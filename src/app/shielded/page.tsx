@@ -94,8 +94,8 @@ export default function Shielded() {
     <Card className="p-6">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center">
-          <ShieldCheckIcon className="w-8 h-8 mr-2 text-gray-400" />
-          <h2 className="text-xl font-semibold text-gray-200">Shielded Wallets</h2>
+          <ShieldCheckIcon className="w-8 h-8 mr-2 text-text/80" />
+          <h2 className="text-xl font-semibold text-text">Shielded Wallets</h2>
         </div>
         <Button onClick={handleCreateWallet} variant="outline">
           <PlusCircleIcon className="w-5 h-5 mr-2" />
@@ -105,9 +105,9 @@ export default function Shielded() {
       {wallets.length > 0 ? (
         <ul className="space-y-4">
           {wallets.map((wallet) => (
-            <li key={wallet.id} className="p-4 bg-gray-800 rounded-md">
-              <p className="font-medium text-gray-200">{wallet.id}</p>
-              <p className="text-sm text-gray-500">Balance: {wallet.balance}</p>
+            <li key={wallet.id} className="p-4 bg-paper rounded-md">
+              <p className="font-medium text-text">{wallet.id}</p>
+              <p className="text-sm text-text/80">Balance: {wallet.balance}</p>
               <div className="mt-4 space-y-2">
                 <div className="flex items-center space-x-2">
                   <Input
@@ -144,7 +144,7 @@ export default function Shielded() {
           ))}
         </ul>
       ) : (
-        <p className="text-center text-gray-500">No shielded wallets found.</p>
+        <p className="text-center text-text/80">No shielded wallets found.</p>
       )}
     </Card>
   );

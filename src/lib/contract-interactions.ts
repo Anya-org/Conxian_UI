@@ -5,15 +5,9 @@ import {
   cvToHex,
 } from '@stacks/transactions';
 import { CoreContracts } from './contracts';
-import { AppConfig } from './config';
-import fetch from 'cross-fetch';
+import { callReadOnly } from './coreApi'; // Import from coreApi
 
 // --- Types ---
-
-interface ReadOnlySuccessResponse {
-  okay: true;
-  result: string;
-}
 
 interface ApiResult<T> {
   success: boolean;
@@ -22,29 +16,6 @@ interface ApiResult<T> {
 }
 
 // --- Helper Functions ---
-
-async function callReadOnly(contractAddress: string, contractName: string, functionName: string, senderAddress: string, args: string[]): Promise<ReadOnlySuccessResponse> {
-  const url = `${AppConfig.coreApiUrl}/v2/contracts/call-read/${contractAddress}/${contractName}/${functionName}`;
-  const res = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      sender: senderAddress,
-      arguments: args,
-    }),
-  });
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`Failed to call read-only function: ${res.statusText}, ${body}`);
-  }
-  const data = await res.json();
-  if (!data.okay) {
-    throw new Error(`Read-only call failed: ${JSON.stringify(data)}`);
-  }
-  return data;
-}
 
 async function callReadOnlyContractFunction<T>(
   contractId: string,
@@ -55,8 +26,12 @@ async function callReadOnlyContractFunction<T>(
   const [contractAddress, contractName] = contractId.split('.');
   try {
     const hexArgs = functionArgs.map(arg => cvToHex(arg));
+    // Use the imported callReadOnly function
     const result = await callReadOnly(contractAddress, contractName, functionName, senderAddress, hexArgs);
-    return { success: true, result: result as T };
+    if (!result.ok) {
+      throw new Error(`Read-only call failed: ${result.error}`);
+    }
+    return { success: true, result: result.result as T };
   } catch (error: unknown) {
     return { success: false, error: error instanceof Error ? error.message : 'An unknown error occurred' };
   }

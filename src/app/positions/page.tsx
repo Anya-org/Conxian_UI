@@ -33,9 +33,9 @@ export default function PositionsPage() {
   }, [stxAddress, api]);
 
   return (
-    <div className="min-h-screen w-full p-6 sm:p-10 space-y-8 bg-background-light dark:bg-background-DEFAULT">
+    <div className="min-h-screen w-full p-6 sm:p-10 space-y-8 bg-background">
       <header className="flex items-center justify-between mb-10">
-        <h1 className="text-3xl font-bold text-text-primary">My Positions</h1>
+        <h1 className="text-3xl font-bold text-text">My Positions</h1>
         <div className="lg:hidden">
           <ConnectWallet />
         </div>
@@ -45,18 +45,18 @@ export default function PositionsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {positions.length > 0 ? (
             positions.map((pos, index) => (
-              <Card key={index} className="bg-background-paper">
+              <Card key={index} className="bg-paper">
                 <CardHeader>
-                  <CardTitle className="text-text-primary">{pos.pair}</CardTitle>
+                  <CardTitle className="text-text">{pos.pair}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <p className="text-sm text-text-secondary">Liquidity</p>
-                    <p className="text-lg font-semibold text-text-primary">${pos.liquidity.toLocaleString()}</p>
+                    <p className="text-sm text-text/80">Liquidity</p>
+                    <p className="text-lg font-semibold text-text">${pos.liquidity.toLocaleString()}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-text-secondary">My Balance</p>
-                    <p className="text-lg font-semibold text-text-primary">${pos.balance.toLocaleString()}</p>
+                    <p className="text-sm text-text/80">My Balance</p>
+                    <p className="text-lg font-semibold text-text">${pos.balance.toLocaleString()}</p>
                   </div>
                   <div className="flex gap-4 pt-4">
                     <Button variant="outline" className="w-full">Add</Button>
@@ -66,17 +66,17 @@ export default function PositionsPage() {
               </Card>
             ))
           ) : (
-            <p className="text-text-secondary">No positions found.</p>
+            <p className="text-text/80">No positions found.</p>
           )}
         </div>
       ) : (
         <div className="text-center">
-          <p className="text-text-secondary mb-4">Connect your wallet to see your positions.</p>
+          <p className="text-text/80 mb-4">Connect your wallet to see your positions.</p>
           <ConnectWallet />
         </div>
       )}
 
-      {status && <p className="text-center text-sm text-text-muted mt-6">{status}</p>}
+      {status && <p className="text-center text-sm text-text/80 mt-6">{status}</p>}
     </div>
   );
 }

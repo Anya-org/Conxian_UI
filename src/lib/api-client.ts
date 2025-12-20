@@ -5,65 +5,65 @@ import { ApiService } from './api-services';
 
 export const apiClient = {
   // --- DEX ---
-  getPair: ApiService.getPair,
-  createPair: ApiService.createPair,
-  getLiquidityProviderShare: ApiService.getLiquidityProviderShare,
-  removeLiquidity: ApiService.removeLiquidity,
-  getRoute: ApiService.getRoute,
-  deposit: ApiService.deposit,
+  getPair: (...args: any[]) => ApiService.getPair(...args),
+  createPair: (...args: any[]) => ApiService.createPair(...args),
+  getLiquidityProviderShare: (...args: any[]) => ApiService.getLiquidityProviderShare(...args),
+  removeLiquidity: (...args: any[]) => ApiService.removeLiquidity(...args),
+  getRoute: (...args: any[]) => ApiService.getRoute(...args),
+  deposit: (...args: any[]) => ApiService.deposit(...args),
 
   // --- Oracle ---
-  getPrice: ApiService.getPrice,
+  getPrice: (...args: any[]) => ApiService.getPrice(...args),
 
   // --- Token ---
-  getTokenBalance: ApiService.getTokenBalance,
-  getTokenTotalSupply: ApiService.getTokenTotalSupply,
+  getTokenBalance: (...args: any[]) => ApiService.getTokenBalance(...args),
+  getTokenTotalSupply: (...args: any[]) => ApiService.getTokenTotalSupply(...args),
 
   // --- Vault ---
-  getVaultBalance: ApiService.getVaultBalance,
+  getVaultBalance: (...args: any[]) => ApiService.getVaultBalance(...args),
 
   // --- Bond ---
-  createBond: ApiService.createBond,
+  createBond: (...args: any[]) => ApiService.createBond(...args),
 
   // --- Flash Loan ---
-  executeFlashLoan: ApiService.executeFlashLoan,
+  executeFlashLoan: (...args: any[]) => ApiService.executeFlashLoan(...args),
 
   // --- Security ---
-  getCircuitBreakerStatus: ApiService.getCircuitBreakerStatus,
-  isAudited: ApiService.isAudited,
+  getCircuitBreakerStatus: (...args: any[]) => ApiService.getCircuitBreakerStatus(...args),
+  isAudited: (...args: any[]) => ApiService.isAudited(...args),
 
   // --- Governance ---
-  verifyGovernanceSignature: ApiService.verifyGovernanceSignature,
+  verifyGovernanceSignature: (...args: any[]) => ApiService.verifyGovernanceSignature(...args),
 
   // --- Staking ---
-  getStakingInfo: ApiService.getStakingInfo,
+  getStakingInfo: (...args: any[]) => ApiService.getStakingInfo(...args),
 
   // --- Monitoring ---
-  getSystemHealth: ApiService.getSystemHealth,
-  getAggregatedMetrics: ApiService.getAggregatedMetrics,
-  getFinancialMetrics: ApiService.getFinancialMetrics,
-  getDashboardData: ApiService.getDashboardData,
-  getPerformanceRecommendations: ApiService.getPerformanceRecommendations,
-  getDashboardMetrics: ApiService.getDashboardMetrics,
+  getSystemHealth: (...args: any[]) => ApiService.getSystemHealth(...args),
+  getAggregatedMetrics: (...args: any[]) => ApiService.getAggregatedMetrics(...args),
+  getFinancialMetrics: (...args: any[]) => ApiService.getFinancialMetrics(...args),
+  getDashboardData: (...args: any[]) => ApiService.getDashboardData(...args),
+  getPerformanceRecommendations: (...args: any[]) => ApiService.getPerformanceRecommendations(...args),
+  getDashboardMetrics: (...args: any[]) => ApiService.getDashboardMetrics(...args),
 
   // --- Enterprise ---
-  getEnterpriseConfig: ApiService.getEnterpriseConfig,
+  getEnterpriseConfig: (...args: any[]) => ApiService.getEnterpriseConfig(...args),
 
   // --- Yield Optimizer ---
-  getYieldStrategies: ApiService.getYieldStrategies,
+  getYieldStrategies: (...args: any[]) => ApiService.getYieldStrategies(...args),
 
   // --- Shielded Wallet ---
-  createNewWallet: ApiService.createNewWallet,
-  fetchUserWallets: ApiService.fetchUserWallets,
-  fetchWalletBalance: ApiService.fetchWalletBalance,
-  sendFunds: ApiService.sendFunds,
-  receiveFunds: ApiService.receiveFunds,
+  createNewWallet: (...args: any[]) => ApiService.createNewWallet(...args),
+  fetchUserWallets: (...args: any[]) => ApiService.fetchUserWallets(...args),
+  fetchWalletBalance: (...args: any[]) => ApiService.fetchWalletBalance(...args),
+  sendFunds: (...args: any[]) => ApiService.sendFunds(...args),
+  receiveFunds: (...args: any[]) => ApiService.receiveFunds(...args),
 
   // --- Banking ---
-  executeIntent: ApiService.executeIntent,
+  executeIntent: (...args: any[]) => ApiService.executeIntent(...args),
 
   // --- Positions ---
-  getPositions: ApiService.getPositions,
+  getPositions: (...args: any[]) => ApiService.getPositions(...args),
 };
 
 // --- Data Fetching Hooks (for use in UI components) ---
