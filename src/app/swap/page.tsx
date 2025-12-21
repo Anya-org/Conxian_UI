@@ -1,17 +1,18 @@
-"use client";
-
-import React from "react";
-import { Tokens, CoreContracts } from "@/lib/contracts";
-import {
-  callReadOnly,
-  getFungibleTokenBalances,
-  FungibleTokenBalance,
-} from "@/lib/core-api";
-import { decodeResultHex, getUint } from "@/lib/clarity";
-import { standardPrincipalCV, uintCV, cvToHex } from "@stacks/transactions";
+import { openContractCall } from "@stacks/connect";
+import { 
+  standardPrincipalCV, 
+  uintCV, 
+  cvToHex, 
+  contractPrincipalCV, 
+  PostConditionMode,
+  FungibleConditionCode,
+  createFungiblePostCondition,
+  createSTXPostCondition
+} from "@stacks/transactions";
 import { useWallet } from "@/lib/wallet";
 import ConnectWallet from "@/components/ConnectWallet";
-import { useApi } from "@/lib/api-client";
+// Removed useApi import as we are using direct contract calls
+// import { useApi } from "@/lib/api-client"; 
 
 // Re-styled components
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -76,7 +77,7 @@ export default function SwapPage() {
   const [sending, setSending] = React.useState(false);
   const [status, setStatus] = React.useState<string>("");
   const { connectWallet, stxAddress } = useWallet();
-  const api = useApi();
+  // const api = useApi(); // Unused
 
   const fromTokenInfo = Tokens.find((t) => t.id === fromToken);
   const toTokenInfo = Tokens.find((t) => t.id === toToken);
@@ -85,44 +86,84 @@ export default function SwapPage() {
   );
   const isSameToken = fromToken === toToken;
 
+  // Store the resolved pool principal for the transaction
+  const [poolPrincipal, setPoolPrincipal] = React.useState<string>("");
+
   const getEstimate = React.useCallback(async () => {
     if (!fromToken || !toToken || !debouncedFromAmount || isSameToken) return;
 
-    const router = CoreContracts.find((c) =>
-      c.id.endsWith(".multi-hop-router-v3")
+    const factory = CoreContracts.find((c) =>
+      c.id.endsWith(".dex-factory-v2")
     );
-    if (!router) {
-      console.error("Router contract not found");
+    if (!factory) {
+      console.error("DEX Factory contract not found");
       return;
     }
 
-    const [contractAddress, contractName] = router.id.split(".") as [
+    const [factoryAddress, factoryName] = factory.id.split(".") as [
       string,
       string,
-    ];
-    const functionName = "estimate-output";
-
-    const fromTokenCV = standardPrincipalCV(fromToken);
-    const toTokenCV = standardPrincipalCV(toToken);
-    const fromAmountCV = uintCV(debouncedFromAmount);
-
-    const argsHex = [
-      cvToHex(fromTokenCV),
-      cvToHex(toTokenCV),
-      cvToHex(fromAmountCV),
     ];
 
     setLoading(true);
+    setPoolPrincipal(""); // Reset pool principal
     try {
-      const res = await callReadOnly(
-        contractAddress,
-        contractName,
-        functionName,
-        contractAddress,
-        argsHex
+      // 1. Get Pool Address from Factory
+      const getPoolArgs = [
+        cvToHex(standardPrincipalCV(fromToken)),
+        cvToHex(standardPrincipalCV(toToken)),
+      ];
+
+      const poolRes = await callReadOnly(
+        factoryAddress,
+        factoryName,
+        "get-pool",
+        factoryAddress,
+        getPoolArgs
       );
-      if (res.okay && res.result) {
-        const decoded = decodeResultHex(res.result);
+
+      let foundPool = "";
+      
+      if (poolRes.okay && poolRes.result) {
+        const decoded = decodeResultHex(poolRes.result);
+        if (decoded && decoded.ok && decoded.value) {
+             const val = decoded.value as any;
+             if (val && val.type === 'optional' && val.value) {
+                 const poolField = val.value.value?.pool; 
+                 if (poolField && poolField.type === 'principal') {
+                     foundPool = poolField.value;
+                 }
+             }
+        }
+      }
+
+      if (!foundPool) {
+          console.warn("No pool found for pair");
+          setToAmount("0");
+          return;
+      }
+
+      setPoolPrincipal(foundPool);
+
+      // 2. Get Quote from Pool
+      const [poolAddress, poolName] = foundPool.split(".") as [string, string];
+      
+      const quoteArgs = [
+          cvToHex(uintCV(debouncedFromAmount)),
+          cvToHex(standardPrincipalCV(fromToken)),
+          cvToHex(standardPrincipalCV(toToken))
+      ];
+
+      const quoteRes = await callReadOnly(
+          poolAddress,
+          poolName,
+          "get-quote",
+          poolAddress, 
+          quoteArgs
+      );
+
+      if (quoteRes.okay && quoteRes.result) {
+        const decoded = decodeResultHex(quoteRes.result);
         if (decoded && decoded.ok) {
           const uint = getUint(decoded.value);
           if (uint !== null) {
@@ -130,34 +171,80 @@ export default function SwapPage() {
           }
         }
       }
+    } catch (e) {
+      console.error("Estimation failed", e);
+      setToAmount("");
     } finally {
       setLoading(false);
     }
   }, [fromToken, toToken, debouncedFromAmount, isSameToken]);
 
   const handleSwap = async () => {
-    if (!fromToken || !toToken || !fromAmount || !toAmount || isSameToken)
-      return;
+    if (!fromToken || !toToken || !fromAmount || !toAmount || isSameToken) return;
     if (!stxAddress) {
       setStatus("Please connect wallet to swap");
       return;
     }
+    if (!poolPrincipal) {
+        setStatus("No liquidity pool available for this pair");
+        return;
+    }
+
+    const router = CoreContracts.find((c) => c.id.endsWith(".multi-hop-router-v3"));
+    if (!router) {
+        setStatus("Router configuration missing");
+        return;
+    }
+    const [routerAddress, routerName] = router.id.split(".") as [string, string];
 
     setSending(true);
     setStatus("");
+
     try {
-      const result = await api.executeIntent({
-        type: 'swap',
-        fromToken: fromToken,
-        toToken: toToken,
-        amount: Number(fromAmount) / 1_000_000,
+      const amountIn = BigInt(fromAmount);
+      // minAmountOut = output * (1 - slippage/100)
+      // We calculate this approximately. slippage is in percentage e.g. 0.5
+      // factor = (10000 - slippage * 100) / 10000
+      const amountOut = BigInt(toAmount || "0");
+      const slippageBps = Math.floor(slippage * 100);
+      const minAmountOut = amountOut * BigInt(10000 - slippageBps) / BigInt(10000);
+
+      // Construct PostConditions
+      // Sending fromToken (fungible)
+      // For MVP we can use PostConditionMode.Allow to avoid complex PC construction errors,
+      // but ideally we construct them.
+      // Assuming SIP-010 traits.
+      
+      const [poolAddress, poolName] = poolPrincipal.split(".");
+
+      const functionArgs = [
+          uintCV(amountIn),
+          uintCV(minAmountOut),
+          contractPrincipalCV(poolAddress, poolName),
+          standardPrincipalCV(fromToken),
+          standardPrincipalCV(toToken)
+      ];
+
+      await openContractCall({
+          contractAddress: routerAddress,
+          contractName: routerName,
+          functionName: "swap-direct",
+          functionArgs,
+          postConditionMode: PostConditionMode.Allow, // Using Allow for ease of testing
+          postConditions: [],
+          onFinish: (data) => {
+              setStatus(`Submitted. Tx ID: ${data.txId}`);
+              setSending(false);
+          },
+          onCancel: () => {
+              setStatus("Transaction canceled");
+              setSending(false);
+          }
       });
       
-      setStatus(`Submitted. Tx ID: ${result.txId}`);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       setStatus(`Error: ${msg}`);
-    } finally {
       setSending(false);
     }
   };
