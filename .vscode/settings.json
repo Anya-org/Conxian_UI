@@ -1,3 +1,5 @@
 {
-    "vitest.disableWorkspaceWarning": true
+    "vitest.disableWorkspaceWarning": true,
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true
 }
