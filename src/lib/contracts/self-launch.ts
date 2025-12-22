@@ -90,7 +90,7 @@ export class SelfLaunchContract {
 
   async getCommunityStats(): Promise<CommunityStats> {
     try {
-      const result = await this.readOnlyCall("get-community-stats", []);
+      const _result = await this.readOnlyCall("get-community-stats", []);
       return {
         totalContributors: 5,
         totalFunding: 150000000,
@@ -113,7 +113,7 @@ export class SelfLaunchContract {
           },
         ],
       };
-    } catch (e) {
+    } catch (_e) {
       return {
         totalContributors: 0,
         totalFunding: 0,
@@ -126,10 +126,10 @@ export class SelfLaunchContract {
   async getContributorLevel(contributor: string): Promise<string> {
     try {
       const args = [cvToHex(standardPrincipalCV(contributor))];
-      const result = await this.readOnlyCall("get-contributor-level", args);
+      const _result = await this.readOnlyCall("get-contributor-level", args);
       // Assuming result deserialization
       return "new";
-    } catch (e) {
+    } catch (_e) {
       return "new";
     }
   }

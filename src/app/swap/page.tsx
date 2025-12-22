@@ -1,14 +1,11 @@
+"use client";
+
+import React from "react";
 import { openContractCall } from "@stacks/connect";
-import { 
-  standardPrincipalCV, 
-  uintCV, 
-  cvToHex, 
-  contractPrincipalCV, 
-  PostConditionMode,
-  FungibleConditionCode,
-  createFungiblePostCondition,
-  createSTXPostCondition
-} from "@stacks/transactions";
+import { uintCV, cvToHex, contractPrincipalCV, PostConditionMode } from "@stacks/transactions";
+import { Tokens, CoreContracts } from "@/lib/contracts";
+import { callReadOnly, getFungibleTokenBalances, FungibleTokenBalance } from "@/lib/coreApi";
+import { decodeResultHex, getTupleField, getUint } from "@/lib/clarity";
 import { useWallet } from "@/lib/wallet";
 import ConnectWallet from "@/components/ConnectWallet";
 // Removed useApi import as we are using direct contract calls
@@ -63,6 +60,16 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
+function isRecord(v: unknown): v is Record<string, unknown> {
+  return typeof v === "object" && v !== null;
+}
+
+function getPrincipalValue(json: unknown): string | null {
+  if (!isRecord(json)) return null;
+  if (json["type"] !== "principal") return null;
+  return typeof json["value"] === "string" ? json["value"] : null;
+}
+
 // --- Main Swap Page Component ---
 
 export default function SwapPage() {
@@ -108,10 +115,19 @@ export default function SwapPage() {
     setLoading(true);
     setPoolPrincipal(""); // Reset pool principal
     try {
+      const [fromTokenAddress, fromTokenName] = fromToken.split(".") as [
+        string,
+        string,
+      ];
+      const [toTokenAddress, toTokenName] = toToken.split(".") as [
+        string,
+        string,
+      ];
+
       // 1. Get Pool Address from Factory
       const getPoolArgs = [
-        cvToHex(standardPrincipalCV(fromToken)),
-        cvToHex(standardPrincipalCV(toToken)),
+        cvToHex(contractPrincipalCV(fromTokenAddress, fromTokenName)),
+        cvToHex(contractPrincipalCV(toTokenAddress, toTokenName)),
       ];
 
       const poolRes = await callReadOnly(
@@ -124,16 +140,12 @@ export default function SwapPage() {
 
       let foundPool = "";
       
-      if (poolRes.okay && poolRes.result) {
+      if (poolRes.ok && poolRes.result) {
         const decoded = decodeResultHex(poolRes.result);
-        if (decoded && decoded.ok && decoded.value) {
-             const val = decoded.value as any;
-             if (val && val.type === 'optional' && val.value) {
-                 const poolField = val.value.value?.pool; 
-                 if (poolField && poolField.type === 'principal') {
-                     foundPool = poolField.value;
-                 }
-             }
+        if (decoded && decoded.ok) {
+          const poolField = getTupleField(decoded.value, "pool");
+          const principal = getPrincipalValue(poolField);
+          if (principal) foundPool = principal;
         }
       }
 
@@ -149,9 +161,9 @@ export default function SwapPage() {
       const [poolAddress, poolName] = foundPool.split(".") as [string, string];
       
       const quoteArgs = [
-          cvToHex(uintCV(debouncedFromAmount)),
-          cvToHex(standardPrincipalCV(fromToken)),
-          cvToHex(standardPrincipalCV(toToken))
+          cvToHex(uintCV(BigInt(debouncedFromAmount))),
+          cvToHex(contractPrincipalCV(fromTokenAddress, fromTokenName)),
+          cvToHex(contractPrincipalCV(toTokenAddress, toTokenName))
       ];
 
       const quoteRes = await callReadOnly(
@@ -162,7 +174,7 @@ export default function SwapPage() {
           quoteArgs
       );
 
-      if (quoteRes.okay && quoteRes.result) {
+      if (quoteRes.ok && quoteRes.result) {
         const decoded = decodeResultHex(quoteRes.result);
         if (decoded && decoded.ok) {
           const uint = getUint(decoded.value);
@@ -215,14 +227,25 @@ export default function SwapPage() {
       // but ideally we construct them.
       // Assuming SIP-010 traits.
       
-      const [poolAddress, poolName] = poolPrincipal.split(".");
+      const [poolAddress, poolName] = poolPrincipal.split(".") as [
+        string,
+        string,
+      ];
+      const [fromTokenAddress, fromTokenName] = fromToken.split(".") as [
+        string,
+        string,
+      ];
+      const [toTokenAddress, toTokenName] = toToken.split(".") as [
+        string,
+        string,
+      ];
 
       const functionArgs = [
           uintCV(amountIn),
           uintCV(minAmountOut),
           contractPrincipalCV(poolAddress, poolName),
-          standardPrincipalCV(fromToken),
-          standardPrincipalCV(toToken)
+          contractPrincipalCV(fromTokenAddress, fromTokenName),
+          contractPrincipalCV(toTokenAddress, toTokenName)
       ];
 
       await openContractCall({
@@ -252,7 +275,7 @@ export default function SwapPage() {
   const handleFromAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (/^\d*\.?\d*$/.test(value)) {
-      setFromAmount(parseAmount(value, fromTokenInfo?.decimals));
+      setFromAmount(parseAmount(value, fromTokenInfo?.decimals ?? 6));
     }
   };
   
@@ -308,7 +331,7 @@ export default function SwapPage() {
                 <div className="flex justify-between items-center text-sm">
                   <label htmlFor="from-token" className="text-text-secondary">From</label>
                   <span className="text-text-muted">
-                    Balance: {fromTokenBalance ? formatAmount(fromTokenBalance.balance, fromTokenInfo?.decimals) : 0}
+                    Balance: {fromTokenBalance ? formatAmount(fromTokenBalance.balance, fromTokenInfo?.decimals ?? 6) : 0}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -323,7 +346,7 @@ export default function SwapPage() {
                   <Input
                     type="text"
                     id="from-amount"
-                    value={formatAmount(fromAmount, fromTokenInfo?.decimals)}
+                    value={formatAmount(fromAmount, fromTokenInfo?.decimals ?? 6)}
                     onChange={handleFromAmountChange}
                     className="w-full text-right"
                   />
@@ -354,7 +377,7 @@ export default function SwapPage() {
                   <Input
                     type="text"
                     id="to-amount"
-                    value={formatAmount(toAmount, toTokenInfo?.decimals)}
+                    value={formatAmount(toAmount, toTokenInfo?.decimals ?? 6)}
                     readOnly
                     className="w-full text-right"
                     placeholder="0.0"

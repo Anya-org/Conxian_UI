@@ -1,5 +1,7 @@
 // src/lib/hooks/use-self-launch.ts - React hook for launch system
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { openContractCall } from "@stacks/connect";
+import { PostConditionMode } from "@stacks/transactions";
 import { SelfLaunchContract, LaunchPhase, CommunityStats } from '@/lib/contracts/self-launch';
 
 interface LaunchState {
@@ -79,9 +81,33 @@ export function useSelfLaunch(network: 'mainnet' | 'testnet' | 'devnet' = 'testn
       // In a real implementation, you'd wait for confirmation
       // and then refresh the data
 
-      await refreshData();
+      const txId = await new Promise<string>((resolve, reject) => {
+        try {
+          Promise.resolve(
+            openContractCall({
+              contractAddress: tx.contractAddress,
+              contractName: tx.contractName,
+              functionName: tx.functionName,
+              functionArgs: tx.functionArgs,
+              postConditionMode: PostConditionMode.Allow,
+              postConditions: tx.postConditions,
+              onFinish: async (data) => {
+                await refreshData();
+                resolve(data.txId);
+              },
+              onCancel: () => {
+                reject(new Error("Transaction canceled"));
+              },
+            })
+          ).catch((err: unknown) => {
+            reject(err instanceof Error ? err : new Error(String(err)));
+          });
+        } catch (err: unknown) {
+          reject(err instanceof Error ? err : new Error(String(err)));
+        }
+      });
 
-      return { success: true, txId: tx.txId };
+      return { success: true, txId };
     } catch (error) {
       return {
         success: false,

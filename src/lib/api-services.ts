@@ -5,9 +5,15 @@ import { ContractInteractions } from './contract-interactions';
 const contractInteractionsPromise = import('./contract-interactions').then(module => module.ContractInteractions);
 
 const createApiHandler = (prop: keyof typeof ContractInteractions) => {
-  return async (...args: any[]) => {
-    const ContractInteractions = await contractInteractionsPromise;
-    return (ContractInteractions[prop] as Function)(...args);
+  return async (...args: unknown[]): Promise<unknown> => {
+    try {
+      const ContractInteractions = await contractInteractionsPromise;
+      const fn = ContractInteractions[prop] as (...inner: unknown[]) => unknown;
+      return await fn(...args);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      return { success: false, error: msg };
+    }
   };
 };
 

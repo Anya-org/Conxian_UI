@@ -3,15 +3,14 @@
 import React from 'react';
 import { openContractCall } from "@stacks/connect";
 import { 
-  standardPrincipalCV, 
   uintCV, 
   cvToHex, 
   contractPrincipalCV, 
   PostConditionMode
 } from "@stacks/transactions";
 import { Tokens, CoreContracts } from '@/lib/contracts';
-import { callReadOnly } from "@/lib/core-api";
-import { decodeResultHex } from "@/lib/clarity";
+import { callReadOnly } from "@/lib/coreApi";
+import { decodeResultHex, getTupleField } from "@/lib/clarity";
 import { useWallet } from '@/lib/wallet';
 import ConnectWallet from '@/components/ConnectWallet';
 // import { IntentManager } from '@/lib/intent-manager'; // Unused
@@ -22,6 +21,16 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 
 // const intentManager = new IntentManager(); // Unused
+
+function isRecord(v: unknown): v is Record<string, unknown> {
+  return typeof v === "object" && v !== null;
+}
+
+function getPrincipalValue(json: unknown): string | null {
+  if (!isRecord(json)) return null;
+  if (json["type"] !== "principal") return null;
+  return typeof json["value"] === "string" ? json["value"] : null;
+}
 
 export default function AddLiquidityPage() {
   const [tokenA, setTokenA] = React.useState(Tokens[0].id);
@@ -51,9 +60,11 @@ export default function AddLiquidityPage() {
         if (!factory) throw new Error("DEX Factory not found");
         
         const [factoryAddress, factoryName] = factory.id.split(".") as [string, string];
+        const [tokenAAddress, tokenAName] = tokenA.split(".") as [string, string];
+        const [tokenBAddress, tokenBName] = tokenB.split(".") as [string, string];
         const getPoolArgs = [
-            cvToHex(standardPrincipalCV(tokenA)),
-            cvToHex(standardPrincipalCV(tokenB)),
+            cvToHex(contractPrincipalCV(tokenAAddress, tokenAName)),
+            cvToHex(contractPrincipalCV(tokenBAddress, tokenBName)),
         ];
 
         const poolRes = await callReadOnly(
@@ -65,16 +76,12 @@ export default function AddLiquidityPage() {
         );
 
         let poolPrincipal = "";
-        if (poolRes.okay && poolRes.result) {
+        if (poolRes.ok && poolRes.result) {
             const decoded = decodeResultHex(poolRes.result);
-            if (decoded && decoded.ok && decoded.value) {
-                 const val = decoded.value as any;
-                 if (val && val.type === 'optional' && val.value) {
-                     const poolField = val.value.value?.pool; 
-                     if (poolField && poolField.type === 'principal') {
-                         poolPrincipal = poolField.value;
-                     }
-                 }
+            if (decoded && decoded.ok) {
+              const poolField = getTupleField(decoded.value, "pool");
+              const principal = getPrincipalValue(poolField);
+              if (principal) poolPrincipal = principal;
             }
         }
 
@@ -126,8 +133,8 @@ export default function AddLiquidityPage() {
             functionArgs: [
                 uintCV(amt0Int),
                 uintCV(amt1Int),
-                standardPrincipalCV(t0),
-                standardPrincipalCV(t1)
+                contractPrincipalCV(...(t0.split(".") as [string, string])),
+                contractPrincipalCV(...(t1.split(".") as [string, string]))
             ],
             postConditionMode: PostConditionMode.Allow,
             postConditions: [],
